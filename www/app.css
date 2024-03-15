@@ -1,0 +1,71 @@
+
+/* CSS Colors https://www.w3schools.com/cssref/css_colors.php */
+
+.mb5 {margin-bottom: 5px}
+.mb10 {margin-bottom: 10px}
+.mb20 {margin-bottom: 20px}
+.margin30 {margin: 30px}
+
+.em1 {font-size: 1em}
+.em1-5 {font-size: 1.5em}
+.em2 {font-size: 2em}
+.em3 {font-size: 3em}
+.bb {border-bottom: 1px solid LightGrey;}
+
+.medblue {color: MediumBlue}
+
+.title{
+    
+    font-size: 1.75em;
+    padding: 10px;
+    text-align: center;
+    color: white;
+    background-color: MidnightBlue; 
+    height: 60px;
+    
+}
+
+.content-box{
+    box-shadow: 
+        -1px 0px 1px LightSteelBLue,
+        3px 3px 3px LightSteelBlue;
+       /* 0 4px 5px 0 rgba(0 0 0 / 0.15), 
+        0 1px 10px 0 rgba(0 0 0 / 0.10), 
+        0 2px 4px -1px rgba(0 0 0 / 0.25);
+        0 2px 4px -1px rgba(0 0 0 / 0.25); */
+    padding: 15px;
+}
+
+   
+
+.center-flex {
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    border: none;
+    margin-bottom: 20px;
+}
+
+.nav-tabs > li > a {
+    color: CornFlowerBlue;
+    background-color: transparent;
+    margin: 5px;
+    border: none;
+    border-bottom: inset 1px transparent;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:focus,
+.nav-tabs > li.active > a:hover {
+    color: MediumBlue;
+    background-color: transparent;
+    border: none;
+    border-bottom: inset 1px MediumBlue;
+}
