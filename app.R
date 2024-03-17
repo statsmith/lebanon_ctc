@@ -49,7 +49,7 @@ ui <- function(req) {
     
     fluidPage(
         
-        title = "App Name",
+        title = "Lebanon PAYS Explorer",
         useShinyjs(),
         
         includeCSS(path = "www/app.css"),
