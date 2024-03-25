@@ -16,19 +16,20 @@ p_by_yr <- function(.df, .var){
         ) +
         
         # Reference Line
-        geom_hline(
-            aes(
-                yintercept = .df %>% 
-                    filter(locale == "State") %>% 
-                    filter(grade == "All") %>% 
-                    filter(gender == "All") %>% 
-                    filter(year == max(year)) %>% 
-                    pull(percent)
-            ),
-            col = brewer.pal(brewer.pal.info["Dark2", "maxcolors"], "Dark2")[3],
-            lty = 2,
-            alpha = 0.9
-        ) +
+        # FIXME turned off when filters added (in case All not selected)
+        # geom_hline(
+        #     aes(
+        #         yintercept = .df %>% 
+        #             filter(locale == "State") %>% 
+        #             filter(grade == "All") %>% 
+        #             filter(gender == "All") %>% 
+        #             filter(year == max(year)) %>% 
+        #             pull(percent)
+        #     ),
+        #     col = brewer.pal(brewer.pal.info["Dark2", "maxcolors"], "Dark2")[3],
+        #     lty = 2,
+        #     alpha = 0.9
+        # ) +
         
         facet_grid(grade ~ gender) +
         

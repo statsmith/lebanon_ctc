@@ -4,6 +4,8 @@
 .mb5 {margin-bottom: 5px}
 .mb10 {margin-bottom: 10px}
 .mb20 {margin-bottom: 20px}
+
+.margin10 {margin: 10px}
 .margin30 {margin: 30px}
 
 .em1 {font-size: 1em}
@@ -36,6 +38,14 @@
     padding: 15px;
 }
 
+
+.center-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
    
 .center-flex {
     display: flex;
