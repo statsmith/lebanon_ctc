@@ -354,7 +354,7 @@ server <- function(input, output, session) {
     observe({
         
         questions <- df %>% filter(source == input$source) %>% distinct(q) %>% pull(q) %>% sort()
-        updatePickerInput(session, inputId = "q", label = "", choices = questions)
+        updatePickerInput(session, inputId = "q", label = "Question", choices = questions)
         
     }) %>% 
         
