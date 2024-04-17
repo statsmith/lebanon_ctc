@@ -88,7 +88,7 @@ ui <- function(req) {
                             ),
                             
                             div(
-                              
+                                
                                 class = "margin30",
                                 
                                 "
@@ -100,7 +100,7 @@ ui <- function(req) {
                                 The x-axis is grade, making it easy to see how students progress through middle school and high school.
                                 The y-axis is the percent of students.
                                 "
-                                  
+                                
                             ),
                             
                             div(
@@ -146,13 +146,48 @@ ui <- function(req) {
                             
                             div(
                                 
-                                class = "center-flex",
+                                class = "center-wrap",
                                 
-                                pickerInput(
-                                    inputId = "q", 
-                                    label = "", 
-                                    choices = unique(df$q) %>% sort(), 
-                                    multiple = FALSE
+                                div(
+                                    class = "margin10",
+                                    
+                                    pickerInput(
+                                        inputId = "q", 
+                                        label = "Question", 
+                                        choices = unique(df$q) %>% sort(), 
+                                        multiple = FALSE
+                                    )
+                                ),
+                                
+                                div(
+                                    class = "margin10",
+                                    
+                                    pickerInput(
+                                        inputId = "gender", 
+                                        label = "Gender", 
+                                        choices = unique(levels(df$gender)), 
+                                        selected = c("Female", "Male", "Other"),
+                                        multiple = TRUE,
+                                        width = "150px"
+                                    )
+                                ),
+                                
+                                div(
+                                    class = "margin10",
+                                    
+                                    pickerInput(
+                                        inputId = "grade", 
+                                        label = "Grade", 
+                                        choices = unique(levels(df$grade)), 
+                                        selected = c("12", "10", "8", "6"),
+                                        multiple = TRUE,
+                                        width = "150px"
+                                    )
+                                ),
+                                
+                                div(
+                                    class = "margin10",
+                                    actionLink(inputId = "go", label = "Go", icon = icon("paper-plane"))
                                 )
                             ),
                             
@@ -319,7 +354,7 @@ server <- function(input, output, session) {
     observe({
         
         questions <- df %>% filter(source == input$source) %>% distinct(q) %>% pull(q) %>% sort()
-        updatePickerInput(session, inputId = "q", label = "", choices = questions)
+        updatePickerInput(session, inputId = "q", label = "Question", choices = questions)
         
     }) %>% 
         
@@ -333,7 +368,13 @@ server <- function(input, output, session) {
         
         renderPlot({
             
-            p_by_yr(.df = l_df1[[input$q]], .var = input$q)
+            
+            df_in <- l_df1[[input$q]]
+            
+            if(!is.null(input$gender)) {df_in <- df_in %>% filter(gender %in% input$gender)}
+            if(!is.null(input$grade)) {df_in <- df_in %>% filter(grade %in% input$grade)}
+            
+            p_by_yr(.df = df_in, .var = input$q) 
             
         })
     
@@ -419,9 +460,9 @@ server <- function(input, output, session) {
                     `Diff: Female - Male` = fm_diff,
                     `Diff: Other - Male` = om_diff,
                     `Diff: Other - Female` = of_diff
-
+                    
                 ) %>%
-
+                
                 mutate(across(c(Source:Locale), ~factor(.)))
             
             make_dt(.df) %>% 
