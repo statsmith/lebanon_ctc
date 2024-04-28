@@ -28,7 +28,6 @@ df <- readRDS(file.path("data.rds"))
 l_df1 <- df %>% split(~.$q)
 l_names1 <- names(l_df1)
 
-
 l_df2 <-
     
     df %>%
@@ -38,7 +37,6 @@ l_df2 <-
     mutate(year = factor(year)) %>% 
     mutate(grade = as.numeric(as.character(grade))) %>% 
     split(.$source)
-
 
 
 # Testing ----
@@ -116,6 +114,7 @@ ui <- function(req) {
                             ),
                             
                             div(plotOutput("p_by_grade", height = "600px")), 
+                            div(plotOutput("p_by_cohort", height = "600px")), 
                             
                         ),
                         
@@ -387,6 +386,17 @@ server <- function(input, output, session) {
             p_by_grade(.df = l_df2[[input$source]], .var = input$source)
             
         })
+    
+    ## plot by cohort ----
+    
+    output$p_by_cohort <- 
+        
+        renderPlot({
+            
+            p_by_cohort(.df = l_df2[[input$source]], .var = input$source)
+            
+        })
+    
     
     # tables ----
     
