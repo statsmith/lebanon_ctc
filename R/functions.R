@@ -34,7 +34,7 @@ p_by_yr <- function(.df, .var){
         facet_grid(grade ~ gender) +
         
         ggtitle(unique(.df$source), subtitle = .var) +
-        xlab("") +
+        xlab("Year") +
         ylab("") +
         
         scale_y_continuous(labels = scales::percent_format()) +
@@ -85,7 +85,7 @@ p_by_grade <- function(.df, .var){
         facet_grid(locale ~ q, labeller = label_wrap_gen(width = 20, multi_line = TRUE)) +
         
         
-        xlab("") +
+        xlab("Grade") +
         ylab("") +
         ggtitle(.var) +
         
@@ -97,56 +97,61 @@ p_by_grade <- function(.df, .var){
         theme_bw(base_size = 15) +
         
         theme(
-            legend.title = element_blank(),
+            # legend.title = element_blank(),
             plot.title = element_text(hjust = 0.5),
             panel.grid.major.x = element_blank(),
             panel.grid.minor.x = element_blank(),
             panel.grid.minor.y = element_blank(),
             axis.ticks.y = element_blank(),
             
-            panel.border = element_rect(colour = "grey85"),
-            strip.background = element_rect(fill = "grey90",color = "grey90"),
+            panel.border = element_rect(colour = "grey95"),
+            strip.background = element_rect(fill = "grey95",color = "grey90"),
             strip.text = element_text(size = 10)
         )
 }
 
 
+# .var = "Access and Willingness to Use"
+# .df = l_df2[[.var]]
+
 p_by_cohort <- function(.df, .var){
     
     .df <- .df %>% mutate(year = as.numeric(as.character(year)))
     
+    
     .df %>% 
         
         ggplot() +
-        geom_point(aes(x = year, y = percent, col = cohort)) +
-        geom_line(aes(x = year, y = percent, col = cohort)) +
+        geom_point(aes(x = grade, y = percent, col = cohort)) +
+        geom_line(aes(x = grade, y = percent, col = cohort)) +
         
         # State Confidence Intervals
         geom_segment(
             data = .df %>% filter(locale == "State"),
             # NOTE took confidence intervals from PAYS website; these are approximate
-            aes(x = year, xend = year, y = percent - 0.015, yend = percent + 0.015, col = cohort)
+            aes(x = grade, xend = grade, y = percent - 0.015, yend = percent + 0.015, col = cohort)
         ) +
         
-        facet_grid(locale ~ q) +
+        facet_grid(locale ~ q, labeller = label_wrap_gen(width = 20, multi_line = TRUE)) +
+        # facet_grid(locale ~ q) +
         
-        ggtitle(subtitle = .var) +
-        xlab("") +
+        ggtitle(.var) +
+        xlab("Grade") +
         ylab("") +
         
         scale_y_continuous(labels = scales::percent_format()) +
-        scale_x_continuous(
-            limits = c(min(.df$year) - 0.37, max(.df$year) + 0.37),
-            breaks = .df %>% distinct(year) %>% pull(year)
-        ) +
+        # scale_x_continuous(
+            # limits = c(min(.df$year) - 0.37, max(.df$year) + 0.37),
+            # breaks = .df %>% distinct(year) %>% pull(year)
+        # ) +
         expand_limits(y = 0) +
         
-        scale_color_brewer(palette = "Blues") +
+        scale_color_brewer(palette = "Set1") +
         
         theme_bw(base_size = 15) +
         
         theme(
-            legend.title = element_blank(),
+            # legend.title = element_blank(),
             plot.title = element_text(hjust = 0.5),
             plot.subtitle = element_text(hjust = 0.5),
             panel.grid.major.x = element_blank(),
@@ -169,9 +174,9 @@ make_dt <- function(.df){
     
     datatable(
         options = list(
-            dom = "Bt",
+            dom = "Bftip",
             buttons = c('excel'),
-            pageLength = nrow(.), 
+            pageLength = 100, 
             scrollY = 400, 
             scrollX = TRUE,
             # fixedColumns = list(leftColumns = 2),
