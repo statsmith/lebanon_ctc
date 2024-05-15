@@ -453,8 +453,6 @@ server <- function(input, output, session) {
         
         bindEvent(input$go)
     
-    
-    
     # tables ----
     
     ## diff by locale ----

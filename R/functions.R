@@ -2,6 +2,8 @@
 
 p_by_yr <- function(.df, .var, .pal = "Blues"){
     
+    p <- 
+        
     .df %>% 
         
         ggplot() +
@@ -44,8 +46,7 @@ p_by_yr <- function(.df, .var, .pal = "Blues"){
         ) +
         expand_limits(y = 0) +
         
-        # scale_color_manual(values = c("DarkBlue", "CornflowerBlue")) +
-        scale_color_brewer(palette = .pal) +
+        # scale_color_brewer(palette = .pal) +
         
         theme_bw(base_size = 15) +
         
@@ -62,6 +63,13 @@ p_by_yr <- function(.df, .var, .pal = "Blues"){
             # panel.border = element_blank(),
             strip.background = element_rect(fill = "grey95", colour = "grey90")
         )
+    
+    if(.pal == "Blues") p <- p + scale_color_manual(values = brewer.pal(7, .pal)[c(7,4)])
+    if(.pal != "Blues") p <- p + scale_color_brewer(palette = .pal)
+    
+    p
+    
+    
 }
 
 
