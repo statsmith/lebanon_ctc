@@ -93,15 +93,34 @@ ui <- function(req) {
                         # ),
                         
                         div(
+                            
                             class = "center-flex",
-                            pickerInput(
-                                inputId = "source", 
-                                label = "", 
-                                choices = unique(df$source) %>% sort(), 
-                                multiple = FALSE
+                            
+                            div(
+                                class = "margin10",
+                                
+                                pickerInput(
+                                    inputId = "source", 
+                                    label = "", 
+                                    choices = unique(df$source) %>% sort(), 
+                                    multiple = FALSE
+                                )
+                            ),
+                            
+                            div(
+                                class = "margin10",
+                                
+                                pickerInput(
+                                    inputId = "pal", 
+                                    label = "", 
+                                    choices = c("Blues", "Set1"), 
+                                    multiple = FALSE,
+                                    width = "150px"
+                                )
                             )
-                            # )
+                            
                         ),
+                        
                         
                         div(
                             
@@ -326,7 +345,6 @@ ui <- function(req) {
                 )
             )
         )
-    
     )
     
 } # end UI
@@ -383,6 +401,15 @@ server <- function(input, output, session) {
         
         bindEvent(input$source)
     
+    # force drill down plot color update
+    observe({
+        
+        click("go")
+        
+    }) %>% 
+        
+        bindEvent(input$pal)
+    
     # plots ----
     
     
@@ -392,7 +419,7 @@ server <- function(input, output, session) {
         
         renderPlot({
             
-            p_by_grade(.df = l_df2[[input$source]], .var = input$source)
+            p_by_grade(.df = l_df2[[input$source]], .var = input$source, .pal = input$pal)
             
         })
     
@@ -402,7 +429,7 @@ server <- function(input, output, session) {
         
         renderPlot({
             
-            p_by_cohort(.df = l_df2[[input$source]], .var = input$source)
+            p_by_cohort(.df = l_df2[[input$source]], .var = input$source, .pal = input$pal)
             
         })
     
@@ -415,13 +442,12 @@ server <- function(input, output, session) {
         
         renderPlot({
             
-            
             df_in <- l_df1[[input$q]]
             
             if(!is.null(input$gender)) {df_in <- df_in %>% filter(gender %in% input$gender)}
             if(!is.null(input$grade)) {df_in <- df_in %>% filter(grade %in% input$grade)}
             
-            p_by_yr(.df = df_in, .var = input$q) 
+            p_by_yr(.df = df_in, .var = input$q, .pal = input$pal) 
             
         }) %>% 
         

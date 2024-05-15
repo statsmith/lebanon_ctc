@@ -1,6 +1,6 @@
 
 
-p_by_yr <- function(.df, .var){
+p_by_yr <- function(.df, .var, .pal = "Blues"){
     
     .df %>% 
         
@@ -44,7 +44,8 @@ p_by_yr <- function(.df, .var){
         ) +
         expand_limits(y = 0) +
         
-        scale_color_manual(values = c("DarkBlue", "CornflowerBlue")) +
+        # scale_color_manual(values = c("DarkBlue", "CornflowerBlue")) +
+        scale_color_brewer(palette = .pal) +
         
         theme_bw(base_size = 15) +
         
@@ -65,11 +66,10 @@ p_by_yr <- function(.df, .var){
 
 
 
-p_by_grade <- function(.df, .var){
+p_by_grade <- function(.df, .var, .pal = "Blues"){
     
-    n <- .df %>% distinct(year) %>% nrow()
-    mypalette <- brewer.pal(n+3,"Blues")[3:(n+3)]
-    # mypalette <- brewer.pal(6,"Blues")[3:6]    
+    # n <- .df %>% distinct(year) %>% nrow()
+    # mypalette <- brewer.pal(n+3, .pal)[3:(n+3)]
     
     .df %>% 
         ggplot() +
@@ -92,7 +92,8 @@ p_by_grade <- function(.df, .var){
         scale_y_continuous(labels = scales::percent_format()) +
         expand_limits(y = 0) +
         
-        scale_color_manual(values = mypalette) +
+        scale_color_brewer(palette = .pal) +
+        # scale_color_manual(values = mypalette) +
         
         theme_bw(base_size = 15) +
         
@@ -114,7 +115,7 @@ p_by_grade <- function(.df, .var){
 # .var = "Access and Willingness to Use"
 # .df = l_df2[[.var]]
 
-p_by_cohort <- function(.df, .var){
+p_by_cohort <- function(.df, .var, .pal = "Blues"){
     
     .df <- .df %>% mutate(year = as.numeric(as.character(year)))
     
@@ -146,7 +147,7 @@ p_by_cohort <- function(.df, .var){
         # ) +
         expand_limits(y = 0) +
         
-        scale_color_brewer(palette = "Set1") +
+        scale_color_brewer(palette = .pal) +
         
         theme_bw(base_size = 15) +
         
