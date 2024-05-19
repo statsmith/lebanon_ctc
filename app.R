@@ -13,17 +13,16 @@ library(RColorBrewer)
 
 # Constants ----
 
-
-print(getwd())
-
 path <- NA
 source(file.path("info.R"))
 
 # Data ----
 
 # df <- read_csv(file.path("df.csv"))
-df <- readRDS(file.path("data.rds"))
+d <- readRDS(file.path("data.rds"))
 
+df <- d$df
+df_corr <- d$df_corr
 
 l_df1 <- df %>% split(~.$q)
 l_names1 <- names(l_df1)
@@ -37,6 +36,9 @@ l_df2 <-
     mutate(year = factor(year)) %>% 
     mutate(grade = as.numeric(as.character(grade))) %>% 
     split(.$source)
+
+# year as numeric for plots, factor for tables
+df <- df %>% mutate(year = factor(year, levels = rev(unique(.$year))))
 
 
 # Testing ----
@@ -311,16 +313,28 @@ ui <- function(req) {
                                     # ),
                                     div(DT::dataTableOutput("dt_grade"))
                                 )
+                            ),
+                            
+                            tabPanel(
+                                
+                                title = "By Cohort",
+                                
+                                div(
+                                    class = "content-box mb20",
+                                    div(DT::dataTableOutput("dt_cohort"))
+                                )
                             )
                         )
                     ),
                     
+                    ### correlations ----
                     tabPanel(
                         
-                        title = "Big Picture",
+                        title = "Correlations",
                         div(
-                            class = "center-flex",
-                            "Coming Soon..."
+                            class = "content-box mb20",
+                            "Note: some goofy counter-intuitive correlations - TODO check code, dig into survey domain",
+                            div(DT::dataTableOutput("dt_corr"))
                         )
                     )
                     
@@ -455,6 +469,8 @@ server <- function(input, output, session) {
     
     # tables ----
     
+    
+    
     ## diff by locale ----
     
     output$dt_locale <- 
@@ -468,8 +484,10 @@ server <- function(input, output, session) {
                 pivot_wider(names_from = locale, values_from = percent, values_fn = mean) %>% 
                 mutate(leb_state = `Lebanon County` - State) %>% 
                 arrange(-year, -abs(leb_state)) %>% 
+                desired_outcome() %>% 
                 
                 select(
+                    `Desired Outcome` = desired_outcome,
                     Source = source,
                     Question = q,
                     Year = year,
@@ -482,14 +500,19 @@ server <- function(input, output, session) {
                     
                 ) %>%
                 
-                mutate(across(c(Source:Gender), ~factor(.)))
+                mutate(across(c(Source:Gender), ~factor(.))) 
             
             make_dt(.df) %>% 
                 
                 formatPercentage(
-                    columns = 6:8,
+                    columns = 7:9,
                     digits = 1
-                )
+                ) %>% 
+                
+                formatStyle(
+                    columns = 9,
+                    color = styleInterval(c(-0.05, 0.05), c("blue", "black", "blue"))
+                ) 
         })
     
     ## diff by gender ----
@@ -507,10 +530,11 @@ server <- function(input, output, session) {
                 mutate(fm_diff = Female - Male) %>% 
                 mutate(om_diff = Other - Male) %>% 
                 mutate(of_diff = Other - Female) %>% 
-                
                 arrange(-year, -abs(fm_diff)) %>% 
+                desired_outcome() %>% 
                 
                 select(
+                    `Desired Outcome` = desired_outcome,
                     Source = source,
                     Question = q,
                     Year = year,
@@ -532,9 +556,14 @@ server <- function(input, output, session) {
             make_dt(.df) %>% 
                 
                 formatPercentage(
-                    columns = 6:12,
+                    columns = 7:13,
                     digits = 1
-                )
+                ) %>% 
+                
+                formatStyle(
+                    columns = 11:13,
+                    color = styleInterval(c(-0.05, 0.05), c("blue", "black", "blue"))
+                ) 
             
         })
     
@@ -555,10 +584,11 @@ server <- function(input, output, session) {
                 mutate(g12g10 = `12` - `10`) %>% 
                 mutate(g10g8 = `10` - `8`) %>% 
                 mutate(g8g6 = `8` - `6`) %>% 
-                
                 arrange(-year, -abs(g8g6)) %>% 
+                desired_outcome() %>% 
                 
                 select(
+                    `Desired Outcome` = desired_outcome,
                     Source = source,
                     Question = q,
                     Year = year,
@@ -579,11 +609,71 @@ server <- function(input, output, session) {
             make_dt(.df)  %>% 
                 
                 formatPercentage(
-                    columns = 6:12,
+                    columns = 7:13,
                     digits = 1
-                )
+                ) %>% 
+                
+                formatStyle(
+                    columns = 11:13,
+                    color = styleInterval(c(-0.05, 0.05), c("blue", "black", "blue"))
+                ) 
         })
     
+    ## diff by cohort ----
+    
+    output$dt_cohort <-
+        
+        DT::renderDataTable({
+            
+            .df <-
+                
+                df %>% 
+                filter(!is.na(cohort)) %>% 
+                # count(cohort) %>% 
+                select(-year) %>%
+                pivot_wider(names_from = cohort, values_from = percent, values_fn = mean) %>% 
+                desired_outcome() %>% 
+                
+                select(
+                    `Desired Outcome` = desired_outcome,
+                    Source = source,
+                    Question = q,
+                    # Year = year,
+                    Grade = grade,
+                    Gender = gender,
+                    Locale = locale,
+                    contains("20")
+                    
+                ) %>%
+                
+                mutate(across(c(Source:Locale), ~factor(.))) 
+            
+            
+            make_dt(.df)  %>% 
+                
+                formatPercentage(
+                    columns = 7:ncol(.df),
+                    digits = 1
+                ) 
+            
+        })
+    
+    # correlations ----
+    
+    output$dt_corr <- DT::renderDataTable({
+        
+        df_corr %>% 
+            
+        make_dt() %>% 
+            
+            formatStyle(
+                
+                columns = "Correlation", 
+                target = "cell",
+                backgroundColor = styleInterval(c(seq(-1, 1, 0.01)), colorRampPalette(c("#b3cde3", "#FFFFFF", "#fbb4ae"))(202))
+            )
+        
+    })
     
     
     
