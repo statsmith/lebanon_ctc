@@ -13,21 +13,19 @@ library(RColorBrewer)
 
 # Constants ----
 
-
-print(getwd())
-
 path <- NA
 source(file.path("info.R"))
 
 # Data ----
 
 # df <- read_csv(file.path("df.csv"))
-df <- readRDS(file.path("data.rds"))
+d <- readRDS(file.path("data.rds"))
 
+df <- d$df
+df_corr <- d$df_corr
 
 l_df1 <- df %>% split(~.$q)
 l_names1 <- names(l_df1)
-
 
 l_df2 <-
     
@@ -39,6 +37,8 @@ l_df2 <-
     mutate(grade = as.numeric(as.character(grade))) %>% 
     split(.$source)
 
+# year as numeric for plots, factor for tables
+df <- df %>% mutate(year = factor(year, levels = rev(unique(.$year))))
 
 
 # Testing ----
@@ -78,34 +78,28 @@ ui <- function(req) {
                         
                         title = "Plots",
                         
+                        # div(
+                        
+                        # class = "center-flex",
+                        
+                        # div(
+                        #     
+                        #     class = "center-wrap margin30",
+                        #     
+                        #         "Select data source form the drop-down menu", tags$br(),
+                        #         "Data for all students (all genders) is shown in the next two plots (By Grade, By Cohort)", tags$br(),
+                        #         "Top Row of Plots: Lebanon county;  Bottom Row of Plots: state of PA", tags$br(),
+                        #         "Columns of Plots: questions in the selected data source", tags$br(),
+                        #         "x-axis: grade or cohort (making it easy to see how students progress through school)", tags$br(),
+                        #         "y-axis: percent (%) of students"
+                        # ),
+                        
                         div(
                             
-                            class = "content-box mb20",
+                            class = "center-flex",
                             
                             div(
-                                class = "center-flex medblue em1-5",
-                                "By Grade"
-                            ),
-                            
-                            div(
-                                
-                                class = "margin30",
-                                
-                                "
-                                Select the data source form the drop-down menu.  
-                                The data for all students (all genders) is plotted.
-                                The top row of plots is for Lebanon County.
-                                The bottom row of plots is for the state of PA.
-                                Each column corresponds to a question in the selected data source.
-                                The x-axis is grade, making it easy to see how students progress through middle school and high school.
-                                The y-axis is the percent of students.
-                                "
-                                
-                            ),
-                            
-                            div(
-                                
-                                class = "center-flex",
+                                class = "margin10",
                                 
                                 pickerInput(
                                     inputId = "source", 
@@ -115,7 +109,27 @@ ui <- function(req) {
                                 )
                             ),
                             
-                            div(plotOutput("p_by_grade", height = "600px")), 
+                            div(
+                                class = "margin10",
+                                
+                                pickerInput(
+                                    inputId = "pal", 
+                                    label = "", 
+                                    choices = c("Blues", "Set1"), 
+                                    multiple = FALSE,
+                                    width = "150px"
+                                )
+                            )
+                            
+                        ),
+                        
+                        
+                        div(
+                            
+                            class = "content-box mb20",
+                            
+                            div(class = "center-flex medblue em1-5", "Compare Grades"),
+                            div(class = "mb20", plotOutput("p_by_grade", height = "500px"))
                             
                         ),
                         
@@ -123,26 +137,31 @@ ui <- function(req) {
                             
                             class = "content-box mb20",
                             
-                            div(
-                                class = "center-flex medblue em1-5",
-                                "By Year"
-                            ),
+                            div(class = "center-flex medblue em1-5", "Compare Cohorts"),
+                            div(class = "mb20", plotOutput("p_by_cohort", height = "500px"))
                             
-                            div(
-                                
-                                class = "margin30",
-                                
-                                "
-                                This plot allows the user to drill down into specific demographics for selected questions.
-                                Select the question from the drop down menu.  
-                                Only questions in the data source (selected above) will be shown.
-                                Rows of plots correspond to grade.
-                                Columns of plots correspond to gender.
-                                The x-axis is year (of the survey).
-                                The y-axis is the percent of students.
-                                "
-                                
-                            ),
+                        ),
+                        
+                        
+                        div(
+                            
+                            class = "content-box mb20",
+                            
+                            div(class = "center-flex medblue em1-5", "Longitudinal Drill Down"),
+                            
+                            # div(
+                            #     
+                            #     class = "center-wrap margin30",
+                            #     
+                            #     "This plot allows the user to drill down into specific demographics for the specific question", tags$br(),
+                            #     "The data source is selected at the top of this page", tags$br(),
+                            #     "Select the question (within the data source) from the drop down menu", tags$br(),
+                            #     "Rows of plots correspond to grade", tags$br(),
+                            #     "Columns of plots correspond to gender", tags$br(),
+                            #     "The x-axis is year (of the survey)", tags$br(), 
+                            #     "The y-axis is the percent of students"
+                            #     
+                            # ),
                             
                             div(
                                 
@@ -191,96 +210,134 @@ ui <- function(req) {
                                 )
                             ),
                             
-                            div(plotOutput("p_by_yr", height = "600px"))
+                            div(plotOutput("p_by_yr", height = "500px"))
+                            
                         )
-                    ),
+                    ),  # End Tab Panel Plots
                     
                     tabPanel(
                         
                         ### tables ----
                         title = "Tables",
                         
-                        div(
+                        tabsetPanel(
                             
-                            class = "content-box mb20",
-                            
-                            div(
-                                class = "center-flex medblue em1-5",
-                                "Differences: By Locale"
+                            tabPanel(
+                                
+                                title = "By Locale",
+                                
+                                div(
+                                    
+                                    class = "content-box mb20",
+                                    
+                                    # div(
+                                    #     class = "center-flex medblue em1-5",
+                                    #     "Differences: By Locale"
+                                    # ),
+                                    
+                                    #     div(
+                                    #         
+                                    #         class = "margin30",
+                                    #         
+                                    #         "
+                                    # This table compares county level data to state level data.
+                                    # Click the grey triangles next to column names to sort. 
+                                    # This makes it easy to find the biggest differences.
+                                    # Filter the table using the boxes below each column name.
+                                    # Click the Excel button to download the data.
+                                    # "
+                                    # 
+                                    #     ),
+                                    
+                                    div(DT::dataTableOutput("dt_locale"))
+                                )
                             ),
                             
-                            div(
+                            tabPanel(
                                 
-                                class = "margin30",
+                                title = "By Gender",
                                 
-                                "
-                                This table compares county level data to state level data.
-                                Click the grey triangles next to column names to sort. 
-                                This makes it easy to find the biggest differences.
-                                Filter the table using the boxes below each column name.
-                                Click the Excel button to download the data.
-                                "
-                                
+                                div(
+                                    
+                                    class = "content-box mb20",
+                                    
+                                    # div(
+                                    #     class = "center-flex medblue em1-5",
+                                    #     "Differences: By Gender"
+                                    # ),
+                                    
+                                    #     div(
+                                    #         
+                                    #         class = "margin30",
+                                    #         
+                                    #         "
+                                    # This table compares data by gender.
+                                    # Click the grey triangles next to column names to sort. 
+                                    # This makes it easy to find the biggest differences.
+                                    # Filter the table using the boxes below each column name.
+                                    # Click the Excel button to download the data.
+                                    # "
+                                    # 
+                                    #     ),
+                                    
+                                    div(DT::dataTableOutput("dt_gender"))
+                                )
                             ),
                             
-                            div(DT::dataTableOutput("dt_locale"))
-                        ),
-                        
-                        
-                        div(
-                            
-                            class = "content-box mb20",
-                            
-                            div(
-                                class = "center-flex medblue em1-5",
-                                "Differences: By Gender"
+                            tabPanel(
+                                
+                                title = "By Grade",
+                                
+                                div(
+                                    
+                                    class = "content-box mb20",
+                                    
+                                    # div(
+                                    #     class = "center-flex medblue em1-5",
+                                    #     "Differences: By Grade"
+                                    # ),
+                                    
+                                    # div(
+                                    #     
+                                    #     class = "margin30",
+                                    #     
+                                    #     "
+                                    #     This table compares data by grade.
+                                    #     Click the grey triangles next to column names to sort. 
+                                    #     This makes it easy to find the biggest differences. 
+                                    #     Specifically, what are the biggest challenges as kids go from 6th grade to 8th grade, 8th grade to 10th grade, and 10th grade to 12th grade.
+                                    #     Filter the table using the boxes below each column name.
+                                    #     Click the Excel button to download the data.
+                                    #     "
+                                    #     
+                                    # ),
+                                    div(DT::dataTableOutput("dt_grade"))
+                                )
                             ),
                             
-                            div(
+                            tabPanel(
                                 
-                                class = "margin30",
+                                title = "By Cohort",
                                 
-                                "
-                                This table compares data by gender.
-                                Click the grey triangles next to column names to sort. 
-                                This makes it easy to find the biggest differences.
-                                Filter the table using the boxes below each column name.
-                                Click the Excel button to download the data.
-                                "
-                                
-                            ),
-                            
-                            div(DT::dataTableOutput("dt_gender"))
-                        ),
-                        
-                        div(
-                            
-                            class = "content-box mb20",
-                            
-                            div(
-                                class = "center-flex medblue em1-5",
-                                "Differences: By Grade"
-                            ),
-                            
-                            div(
-                                
-                                class = "margin30",
-                                
-                                "
-                                This table compares data by grade.
-                                Click the grey triangles next to column names to sort. 
-                                This makes it easy to find the biggest differences. 
-                                Specifically, what are the biggest challenges as kids go from 6th grade to 8th grade, 8th grade to 10th grade, and 10th grade to 12th grade.
-                                Filter the table using the boxes below each column name.
-                                Click the Excel button to download the data.
-                                "
-                                
-                            ),
-                            div(DT::dataTableOutput("dt_grade"))
+                                div(
+                                    class = "content-box mb20",
+                                    div(DT::dataTableOutput("dt_cohort"))
+                                )
+                            )
                         )
+                    ),
+                    
+                    ### correlations ----
+                    tabPanel(
                         
-                        
+                        title = "Correlations",
+                        div(
+                            class = "content-box mb20",
+                            "Note: some goofy counter-intuitive correlations - TODO check code, dig into survey domain",
+                            div(DT::dataTableOutput("dt_corr"))
+                        )
                     )
+                    
                 )
                 
             ), # End tabSetPanel
@@ -297,13 +354,11 @@ ui <- function(req) {
                         icon("envelope")
                     ),
                     tags$a(href="https://github.com/statsmith/lebanon_ctc", icon("github"), target = "_blank"),
-                    tags$a(href="https://www.pccd.pa.gov/Juvenile-Justice/pages/pennsylvania-youth-survey-(pays).aspx", img(src='pccd_icon.png', height = "20%", width = "20%"), target = "_blank")
+                    tags$a(href="https://www.pccd.pa.gov/Juvenile-Justice/pages/pennsylvania-youth-survey-(pays).aspx", img(src='pccd_icon2.png', height = "20%", width = "20%"), target = "_blank")
                     
                 )
             )
-            
         )
-        
     )
     
 } # end UI
@@ -360,23 +415,17 @@ server <- function(input, output, session) {
         
         bindEvent(input$source)
     
+    # force drill down plot color update
+    observe({
+        
+        click("go")
+        
+    }) %>% 
+        
+        bindEvent(input$pal)
+    
     # plots ----
     
-    ## plot by yr ----
-    
-    output$p_by_yr <-
-        
-        renderPlot({
-            
-            
-            df_in <- l_df1[[input$q]]
-            
-            if(!is.null(input$gender)) {df_in <- df_in %>% filter(gender %in% input$gender)}
-            if(!is.null(input$grade)) {df_in <- df_in %>% filter(grade %in% input$grade)}
-            
-            p_by_yr(.df = df_in, .var = input$q) 
-            
-        })
     
     ## plot by grade ----
     
@@ -384,11 +433,43 @@ server <- function(input, output, session) {
         
         renderPlot({
             
-            p_by_grade(.df = l_df2[[input$source]], .var = input$source)
+            p_by_grade(.df = l_df2[[input$source]], .var = input$source, .pal = input$pal)
             
         })
     
+    ## plot by cohort ----
+    
+    output$p_by_cohort <- 
+        
+        renderPlot({
+            
+            p_by_cohort(.df = l_df2[[input$source]], .var = input$source, .pal = input$pal)
+            
+        })
+    
+    ## plot by yr ----
+    
+    
+    click("go")
+    
+    output$p_by_yr <-
+        
+        renderPlot({
+            
+            df_in <- l_df1[[input$q]]
+            
+            if(!is.null(input$gender)) {df_in <- df_in %>% filter(gender %in% input$gender)}
+            if(!is.null(input$grade)) {df_in <- df_in %>% filter(grade %in% input$grade)}
+            
+            p_by_yr(.df = df_in, .var = input$q, .pal = input$pal) 
+            
+        }) %>% 
+        
+        bindEvent(input$go)
+    
     # tables ----
+    
+    
     
     ## diff by locale ----
     
@@ -399,16 +480,19 @@ server <- function(input, output, session) {
             .df <- 
                 
                 df %>% 
-                
+                select(-cohort) %>% 
                 pivot_wider(names_from = locale, values_from = percent, values_fn = mean) %>% 
                 mutate(leb_state = `Lebanon County` - State) %>% 
                 arrange(-year, -abs(leb_state)) %>% 
+                desired_outcome() %>% 
                 
                 select(
+                    `Desired Outcome` = desired_outcome,
                     Source = source,
                     Question = q,
                     Year = year,
                     Grade = grade,
+                    # Cohort = cohort,
                     Gender = gender,
                     `Lebanon County`,
                     State,
@@ -416,17 +500,19 @@ server <- function(input, output, session) {
                     
                 ) %>%
                 
-                mutate(across(c(Source:Gender), ~factor(.)))
-            
+                mutate(across(c(Source:Gender), ~factor(.))) 
             
             make_dt(.df) %>% 
                 
                 formatPercentage(
-                    columns = 6:8,
+                    columns = 7:9,
                     digits = 1
-                )
-            
-            
+                ) %>% 
+                
+                formatStyle(
+                    columns = 9,
+                    color = styleInterval(c(-0.05, 0.05), c("blue", "black", "blue"))
+                ) 
         })
     
     ## diff by gender ----
@@ -438,20 +524,22 @@ server <- function(input, output, session) {
             .df <- 
                 
                 df %>%
-                
+                select(-cohort) %>%
                 pivot_wider(names_from = gender, values_from = percent, values_fn = mean) %>% 
                 
                 mutate(fm_diff = Female - Male) %>% 
                 mutate(om_diff = Other - Male) %>% 
                 mutate(of_diff = Other - Female) %>% 
-                
                 arrange(-year, -abs(fm_diff)) %>% 
+                desired_outcome() %>% 
                 
                 select(
+                    `Desired Outcome` = desired_outcome,
                     Source = source,
                     Question = q,
                     Year = year,
                     Grade = grade,
+                    # Cohort = cohort,
                     Locale = locale,
                     All,
                     Female,
@@ -468,9 +556,14 @@ server <- function(input, output, session) {
             make_dt(.df) %>% 
                 
                 formatPercentage(
-                    columns = 6:12,
+                    columns = 7:13,
                     digits = 1
-                )
+                ) %>% 
+                
+                formatStyle(
+                    columns = 11:13,
+                    color = styleInterval(c(-0.05, 0.05), c("blue", "black", "blue"))
+                ) 
             
         })
     
@@ -485,15 +578,17 @@ server <- function(input, output, session) {
                 df %>%
                 
                 filter(grade != "All") %>% 
+                select(-cohort) %>% 
                 pivot_wider(names_from = grade, values_from = percent, values_fn = mean) %>% 
                 
                 mutate(g12g10 = `12` - `10`) %>% 
                 mutate(g10g8 = `10` - `8`) %>% 
                 mutate(g8g6 = `8` - `6`) %>% 
-                
                 arrange(-year, -abs(g8g6)) %>% 
+                desired_outcome() %>% 
                 
                 select(
+                    `Desired Outcome` = desired_outcome,
                     Source = source,
                     Question = q,
                     Year = year,
@@ -514,11 +609,71 @@ server <- function(input, output, session) {
             make_dt(.df)  %>% 
                 
                 formatPercentage(
-                    columns = 6:12,
+                    columns = 7:13,
                     digits = 1
-                )
+                ) %>% 
+                
+                formatStyle(
+                    columns = 11:13,
+                    color = styleInterval(c(-0.05, 0.05), c("blue", "black", "blue"))
+                ) 
         })
     
+    ## diff by cohort ----
+    
+    output$dt_cohort <-
+        
+        DT::renderDataTable({
+            
+            .df <-
+                
+                df %>% 
+                filter(!is.na(cohort)) %>% 
+                # count(cohort) %>% 
+                select(-year) %>%
+                pivot_wider(names_from = cohort, values_from = percent, values_fn = mean) %>% 
+                desired_outcome() %>% 
+                
+                select(
+                    `Desired Outcome` = desired_outcome,
+                    Source = source,
+                    Question = q,
+                    # Year = year,
+                    Grade = grade,
+                    Gender = gender,
+                    Locale = locale,
+                    contains("20")
+                    
+                ) %>%
+                
+                mutate(across(c(Source:Locale), ~factor(.))) 
+            
+            
+            make_dt(.df)  %>% 
+                
+                formatPercentage(
+                    columns = 7:ncol(.df),
+                    digits = 1
+                ) 
+            
+        })
+    
+    # correlations ----
+    
+    output$dt_corr <- DT::renderDataTable({
+        
+        df_corr %>% 
+            
+        make_dt() %>% 
+            
+            formatStyle(
+                
+                columns = "Correlation", 
+                target = "cell",
+                backgroundColor = styleInterval(c(seq(-1, 1, 0.01)), colorRampPalette(c("#b3cde3", "#FFFFFF", "#fbb4ae"))(202))
+            )
+        
+    })
     
     
     
