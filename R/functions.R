@@ -175,7 +175,27 @@ p_by_cohort <- function(.df, .var, .pal = "Blues"){
 }
 
 
-
+desired_outcome <- function(.df, .source = "source", .q = "q"){
+    
+    .df %>% 
+        
+        # distinct(source, q) %>% 
+        
+        mutate(
+            
+            desired_outcome = 
+                
+                case_when(
+                    grepl(pattern = "^attitude|involve|^positive|^percept|^protective", !!sym(.source), ignore.case = TRUE) ~ "High",
+                    grepl(pattern = "adults would think it was wrong|would be caught by the police|knows where i am|clear family rules|rules in family", !!sym(.q), ignore.case = TRUE) ~ "High",
+                    grepl(pattern = "I was not bullied", !!sym(.q), ignore.case = TRUE) ~ "High",
+                    grepl("^No", !!sym(.q), ignore.case = TRUE) & grepl("Bullying Freq", !!sym(.source), ignore.case = TRUE) ~ "High",
+                    TRUE ~ "Low"
+                )
+        ) %>% 
+        
+        mutate(desired_outcome = factor(desired_outcome))
+}
 
 make_dt <- function(.df){
     
