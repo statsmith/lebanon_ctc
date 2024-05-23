@@ -249,8 +249,13 @@ ui <- function(req) {
                                     # 
                                     #     ),
                                     
-                                    div(DT::dataTableOutput("dt_locale"))
+                                    DT::dataTableOutput("dt_locale")
                                 )
+                                # 
+                                # div(
+                                #     class = "content-box mb20",
+                                #     plotOutput("p_df_locale")
+                                # )
                             ),
                             
                             tabPanel(
@@ -377,6 +382,10 @@ server <- function(input, output, session) {
             
             print("testing")
             
+            print("locale")
+            print(input$dt_locale_rows_selected)
+            
+            print(df_p_cohort())
         }
     })
     
@@ -473,9 +482,9 @@ server <- function(input, output, session) {
     
     ## diff by locale ----
     
-    output$dt_locale <- 
+    dt_locale <- 
         
-        DT::renderDataTable({
+        reactive({
             
             .df <- 
                 
@@ -502,7 +511,14 @@ server <- function(input, output, session) {
                 
                 mutate(across(c(Source:Gender), ~factor(.))) 
             
-            make_dt(.df) %>% 
+            
+        })
+    
+    output$dt_locale <- 
+        
+        DT::renderDataTable({
+            
+            make_dt(dt_locale()) %>% 
                 
                 formatPercentage(
                     columns = 7:9,
@@ -517,9 +533,9 @@ server <- function(input, output, session) {
     
     ## diff by gender ----
     
-    output$dt_gender <- 
+    dt_gender <- 
         
-        DT::renderDataTable({
+        reactive({
             
             .df <- 
                 
@@ -552,8 +568,14 @@ server <- function(input, output, session) {
                 ) %>%
                 
                 mutate(across(c(Source:Locale), ~factor(.)))
+        })
+    
+    
+    output$dt_gender <- 
+        
+        DT::renderDataTable({
             
-            make_dt(.df) %>% 
+            make_dt(dt_gender()) %>% 
                 
                 formatPercentage(
                     columns = 7:13,
@@ -569,10 +591,10 @@ server <- function(input, output, session) {
     
     ## diff by grade ----
     
-    output$dt_grade <-
+    dt_grade <- 
         
-        DT::renderDataTable({
-            
+        reactive({
+           
             .df <- 
                 
                 df %>%
@@ -605,8 +627,13 @@ server <- function(input, output, session) {
                 mutate(across(c(Source:Locale), ~factor(.))) %>% 
                 mutate(across(c(`Diff: 12-10`, `Diff: 10-8`, `Diff: 8-6`), ~as.numeric(.)))
             
+        })
+    
+    output$dt_grade <-
+        
+        DT::renderDataTable({
             
-            make_dt(.df)  %>% 
+            make_dt(dt_grade())  %>% 
                 
                 formatPercentage(
                     columns = 7:13,
@@ -621,9 +648,9 @@ server <- function(input, output, session) {
     
     ## diff by cohort ----
     
-    output$dt_cohort <-
+    dt_cohort <- 
         
-        DT::renderDataTable({
+        reactive({
             
             .df <-
                 
@@ -648,15 +675,251 @@ server <- function(input, output, session) {
                 
                 mutate(across(c(Source:Locale), ~factor(.))) 
             
+        })
+    
+    output$dt_cohort <-
+        
+        DT::renderDataTable({
             
-            make_dt(.df)  %>% 
+            make_dt(dt_cohort())  %>% 
                 
                 formatPercentage(
-                    columns = 7:ncol(.df),
+                    columns = 7:ncol(dt_cohort()),
                     digits = 1
                 ) 
             
         })
+    
+    
+    # modal plots ----
+    
+    ## locale ----
+    
+    df_p_locale <- 
+        
+        reactive({
+            
+            df_mod_locale <- 
+                
+                dt_locale() %>% 
+                slice(input$dt_locale_rows_selected) %>% 
+                select(Source, Question) %>% 
+                inner_join(dt_locale()) %>% 
+                select(-contains("iff"), -contains("come")) %>% 
+                pivot_longer(cols = c("Lebanon County", "State"), names_to = "locale", values_to = "percent") %>% 
+                rename(q = Question)
+            
+            names(df_mod_locale) <- str_to_lower(names(df_mod_locale))
+            
+            df_mod_locale <- 
+                df_mod_locale %>% 
+                mutate(year = as.numeric(as.character(year))) %>% 
+                filter(gender != "All") %>% 
+                filter(grade != "All")
+            
+            df_mod_locale
+        })
+    
+    output$p_df_locale <- 
+        
+        renderPlot({
+            
+            req(!is.null(input$dt_locale_rows_selected))
+            p_by_yr(.df = df_p_locale(), .var = unique(df_p_locale()$q), .pal = input$pal)
+            
+        })
+    
+    
+    observe({
+        
+        showModal(
+            
+            modalDialog(
+                
+                div(
+                    class = "content-box mb20",
+                    plotOutput("p_df_locale")
+                ),
+                
+                size = "l", easyClose = TRUE, fade = TRUE
+            )
+        )
+        
+    }) %>% 
+        
+        bindEvent(input$dt_locale_rows_selected)
+    
+    
+    ## gender ----
+    
+    df_p_gender <- 
+        
+        reactive({
+            
+            df_mod_gender <- 
+                
+                dt_gender() %>% 
+                slice(input$dt_gender_rows_selected) %>% 
+                select(Source, Question) %>%
+                inner_join(dt_gender()) %>% 
+                select(-contains("iff"), -contains("come")) %>%
+                pivot_longer(cols = c("Female", "Male", "Other", "All"), names_to = "gender", values_to = "percent") %>%
+                rename(q = Question)
+
+            names(df_mod_gender) <- str_to_lower(names(df_mod_gender))
+
+            df_mod_gender <-
+                df_mod_gender %>%
+                mutate(year = as.numeric(as.character(year))) %>%
+                filter(gender != "All") %>%
+                filter(grade != "All")
+            
+            df_mod_gender
+        })
+    
+    output$p_df_gender <-
+
+        renderPlot({
+
+            req(!is.null(input$dt_gender_rows_selected))
+            p_by_yr(.df = df_p_gender(), .var = unique(df_p_gender()$q), .pal = input$pal)
+
+        })
+    
+    observe({
+
+        showModal(
+
+            modalDialog(
+
+                div(
+                    class = "content-box mb20",
+                    plotOutput("p_df_gender")
+                ),
+
+                size = "l", easyClose = TRUE, fade = TRUE
+            )
+        )
+
+    }) %>%
+
+        bindEvent(input$dt_gender_rows_selected)
+    
+    
+    ## grade ----
+    
+    df_p_grade <- 
+        
+        reactive({
+            
+            df_mod_grade <- 
+                
+                dt_grade() %>% 
+                slice(input$dt_grade_rows_selected) %>% 
+                select(Source, Question) %>%
+                inner_join(dt_grade()) %>% 
+                select(-contains("iff"), -contains("come")) %>%
+                pivot_longer(cols = c("6", "8", "10", "12"), names_to = "grade", values_to = "percent") %>%
+                rename(q = Question) %>% 
+                mutate(grade = factor(grade, levels = rev(c("6", "8", "10", "12"))))
+
+            names(df_mod_grade) <- str_to_lower(names(df_mod_grade))
+
+            df_mod_grade <-
+                df_mod_grade %>%
+                mutate(year = as.numeric(as.character(year))) %>%
+                filter(grade != "All") %>%
+                filter(grade != "All")
+            
+            df_mod_grade
+        })
+    
+    output$p_df_grade <-
+        
+        renderPlot({
+            
+            req(!is.null(input$dt_grade_rows_selected))
+            p_by_yr(.df = df_p_grade(), .var = unique(df_p_grade()$q), .pal = input$pal)
+            
+        })
+    
+    observe({
+
+        showModal(
+
+            modalDialog(
+
+                div(
+                    class = "content-box mb20",
+                    plotOutput("p_df_grade")
+                ),
+
+                size = "l", easyClose = TRUE, fade = TRUE
+            )
+        )
+
+    }) %>%
+
+        bindEvent(input$dt_grade_rows_selected)
+    
+    
+    
+    ## cohort ----
+    
+    df_p_cohort <- 
+        
+        reactive({
+            
+            df_mod_cohort <- 
+                
+                dt_cohort() %>% 
+                slice(input$dt_cohort_rows_selected) %>% 
+                select(Source, Question, Locale, Gender) %>%
+                inner_join(dt_cohort()) %>%
+                
+                select(-contains("iff"), -contains("come")) %>%
+                pivot_longer(cols = contains("20"), names_to = "cohort", values_to = "percent") %>%
+                rename(q = Question) %>%
+                mutate(cohort = factor(cohort, levels = as.character(seq(2018,2050,2)))) 
+
+            names(df_mod_cohort) <- str_to_lower(names(df_mod_cohort))
+
+            df_mod_cohort <-
+                df_mod_cohort %>%
+                mutate(grade = as.numeric(as.character(grade)))
+            
+            df_mod_cohort
+        })
+    
+    
+    output$p_df_cohort <-
+
+        renderPlot({
+
+            req(!is.null(input$dt_cohort_rows_selected))
+            p_by_cohort(.df = df_p_cohort(), .var = unique(df_p_cohort()$q), .pal = input$pal)
+
+        })
+    
+    observe({
+
+        showModal(
+
+            modalDialog(
+
+                div(
+                    class = "content-box mb20",
+                    plotOutput("p_df_cohort")
+                ),
+
+                size = "l", easyClose = TRUE, fade = TRUE
+            )
+        )
+
+    }) %>%
+
+        bindEvent(input$dt_cohort_rows_selected)
+    
     
     # correlations ----
     
@@ -664,7 +927,7 @@ server <- function(input, output, session) {
         
         df_corr %>% 
             
-        make_dt() %>% 
+            make_dt() %>% 
             
             formatStyle(
                 

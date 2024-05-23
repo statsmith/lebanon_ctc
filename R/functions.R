@@ -125,7 +125,7 @@ p_by_grade <- function(.df, .var, .pal = "Blues"){
 
 p_by_cohort <- function(.df, .var, .pal = "Blues"){
     
-    .df <- .df %>% mutate(year = as.numeric(as.character(year)))
+    # .df <- .df %>% mutate(year = as.numeric(as.character(year)))
     
     
     .df %>% 
