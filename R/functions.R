@@ -1,76 +1,179 @@
 
 
-p_by_yr <- function(.df, .var, .pal = "Blues"){
+
+
+p_by_i_yr <-
     
-    p <- 
+    function(.df, .var, .pal = "Blues"){
         
-    .df %>% 
-        
-        ggplot() +
-        geom_point(aes(x = year, y = percent, col = locale)) +
-        geom_line(aes(x = year, y = percent, col = locale)) +
-        
-        # State Confidence Intervals
-        geom_segment(
-            data = .df %>% filter(locale == "State"),
-            # NOTE took confidence intervals from PAYS website; these are approximate
-            aes(x = year, xend = year, y = percent - 0.015, yend = percent + 0.015, col = locale)
-        ) +
-        
-        # Reference Line
-        # FIXME turned off when filters added (in case All not selected)
-        # geom_hline(
-        #     aes(
-        #         yintercept = .df %>% 
-        #             filter(locale == "State") %>% 
-        #             filter(grade == "All") %>% 
-        #             filter(gender == "All") %>% 
-        #             filter(year == max(year)) %>% 
-        #             pull(percent)
-        #     ),
-        #     col = brewer.pal(brewer.pal.info["Dark2", "maxcolors"], "Dark2")[3],
-        #     lty = 2,
-        #     alpha = 0.9
-        # ) +
-        
-        facet_grid(grade ~ gender) +
-        
-        ggtitle(unique(.df$source), subtitle = .var) +
-        xlab("Year") +
-        ylab("") +
-        
-        scale_y_continuous(labels = scales::percent_format()) +
-        scale_x_continuous(
-            limits = c(min(.df$year) - 0.37, max(.df$year) + 0.37),
-            breaks = .df %>% distinct(year) %>% pull(year)
-        ) +
-        expand_limits(y = 0) +
-        
-        # scale_color_brewer(palette = .pal) +
-        
-        theme_bw(base_size = 15) +
-        
-        theme(
-            legend.title = element_blank(),
-            plot.title = element_text(hjust = 0.5),
-            plot.subtitle = element_text(hjust = 0.5),
-            panel.grid.major.x = element_blank(),
-            panel.grid.minor.x = element_blank(),
-            panel.grid.minor.y = element_blank(),
-            axis.ticks.y = element_blank(),
+        p <-
             
-            panel.border = element_rect(colour = "grey95"),
-            # panel.border = element_blank(),
-            strip.background = element_rect(fill = "grey95", colour = "grey90")
-        )
-    
-    if(.pal == "Blues") p <- p + scale_color_manual(values = brewer.pal(7, .pal)[c(7,4)])
-    if(.pal != "Blues") p <- p + scale_color_brewer(palette = .pal)
-    
-    p
-    
-    
-}
+            .df %>% 
+            
+            ggplot() +
+            
+            geom_point_interactive(
+                aes(
+                    x = year, 
+                    y = percent, 
+                    col = locale,
+                    tooltip = paste0(
+                        source, " <br> ",
+                        q, " <br> ",
+                        year," <br> ",
+                        locale," <br> ",
+                        "Grade: ", grade," <br> ",
+                        "Gender ", gender," <br> ",
+                        round(100 * percent, 1)
+                    ),
+                    data_id = q,
+                    hover_css = "fill:none;"
+                )
+                
+            ) +
+            geom_line_interactive(aes(x = year, y = percent, col = locale)) +
+            
+            facet_grid(grade ~ gender) +
+            
+            ggtitle(unique(.df$source), subtitle = .var) +
+            xlab("Year") +
+            ylab("") +
+            
+            scale_y_continuous(labels = scales::percent_format()) +
+            scale_x_continuous(
+                limits = c(min(.df$year) - 0.37, max(.df$year) + 0.37),
+                breaks = .df %>% distinct(year) %>% pull(year)
+            ) +
+            expand_limits(y = 0) +
+            
+            # scale_color_brewer(palette = .pal) +
+            
+            theme_bw(base_size = 12) +
+            
+            theme(
+                legend.title = element_blank(),
+                plot.title = element_text(hjust = 0.5),
+                plot.subtitle = element_text(hjust = 0.5),
+                panel.grid.major.x = element_blank(),
+                panel.grid.minor.x = element_blank(),
+                panel.grid.minor.y = element_blank(),
+                axis.ticks.y = element_blank(),
+                
+                panel.border = element_rect(colour = "grey95"),
+                # panel.border = element_blank(),
+                strip.background = element_rect(fill = "grey95", colour = "grey90")
+            )
+        
+        if(.pal == "Blues") p <- p + scale_color_manual(values = brewer.pal(7, .pal)[c(7,4)])
+        if(.pal != "Blues") p <- p + scale_color_brewer(palette = .pal)
+        
+        p <- girafe(ggobj = p)
+        
+        p <- 
+            girafe_options(
+                p,
+                opts_toolbar(
+                    position = "topright",
+                    saveaspng = TRUE,
+                    # pngname = "diagram",
+                    tooltips = 
+                        list( 
+                            lasso_select = 'lasso selection', 
+                            lasso_deselect = 'lasso deselection', 
+                            zoom_on = 'activate pan/zoom', 
+                            zoom_off = 'deactivate pan/zoom', 
+                            zoom_rect = 'zoom with rectangle', 
+                            zoom_reset = 'reset pan/zoom', 
+                            saveaspng = 'download png' 
+                        ),
+                    hidden = NULL,
+                    # fixed = FALSE,
+                    delay_mouseover = 200,
+                    delay_mouseout = 500
+                ),
+                opts_zoom(min = 0.7, max = 10),
+                opts_selection(type = "single", only_shiny = FALSE),
+                opts_tooltip(opacity = .7, zindex = 9999)
+            )
+        
+        p
+        
+    }
+
+
+
+
+# p_by_yr <- function(.df, .var, .pal = "Blues"){
+#     
+#     p <- 
+#         
+#     .df %>% 
+#         
+#         ggplot() +
+#         geom_point(aes(x = year, y = percent, col = locale)) +
+#         geom_line(aes(x = year, y = percent, col = locale)) +
+#         
+#         # State Confidence Intervals
+#         geom_segment(
+#             data = .df %>% filter(locale == "State"),
+#             # NOTE took confidence intervals from PAYS website; these are approximate
+#             aes(x = year, xend = year, y = percent - 0.015, yend = percent + 0.015, col = locale)
+#         ) +
+#         
+#         # Reference Line
+#         # FIXME turned off when filters added (in case All not selected)
+#         # geom_hline(
+#         #     aes(
+#         #         yintercept = .df %>% 
+#         #             filter(locale == "State") %>% 
+#         #             filter(grade == "All") %>% 
+#         #             filter(gender == "All") %>% 
+#         #             filter(year == max(year)) %>% 
+#         #             pull(percent)
+#         #     ),
+#         #     col = brewer.pal(brewer.pal.info["Dark2", "maxcolors"], "Dark2")[3],
+#         #     lty = 2,
+#         #     alpha = 0.9
+#         # ) +
+#         
+#         facet_grid(grade ~ gender) +
+#         
+#         ggtitle(unique(.df$source), subtitle = .var) +
+#         xlab("Year") +
+#         ylab("") +
+#         
+#         scale_y_continuous(labels = scales::percent_format()) +
+#         scale_x_continuous(
+#             limits = c(min(.df$year) - 0.37, max(.df$year) + 0.37),
+#             breaks = .df %>% distinct(year) %>% pull(year)
+#         ) +
+#         expand_limits(y = 0) +
+#         
+#         # scale_color_brewer(palette = .pal) +
+#         
+#         theme_bw(base_size = 15) +
+#         
+#         theme(
+#             legend.title = element_blank(),
+#             plot.title = element_text(hjust = 0.5),
+#             plot.subtitle = element_text(hjust = 0.5),
+#             panel.grid.major.x = element_blank(),
+#             panel.grid.minor.x = element_blank(),
+#             panel.grid.minor.y = element_blank(),
+#             axis.ticks.y = element_blank(),
+#             
+#             panel.border = element_rect(colour = "grey95"),
+#             # panel.border = element_blank(),
+#             strip.background = element_rect(fill = "grey95", colour = "grey90")
+#         )
+#     
+#     if(.pal == "Blues") p <- p + scale_color_manual(values = brewer.pal(7, .pal)[c(7,4)])
+#     if(.pal != "Blues") p <- p + scale_color_brewer(palette = .pal)
+#     
+#     p
+#     
+#     
+# }
 
 
 
