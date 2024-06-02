@@ -10,6 +10,7 @@ library(DT)
 library(tidyverse)
 library(lubridate)
 library(RColorBrewer)
+library(ggiraph)
 
 # Constants ----
 
@@ -210,7 +211,8 @@ ui <- function(req) {
                                 )
                             ),
                             
-                            div(plotOutput("p_by_yr", height = "500px"))
+                            # div(plotOutput("p_by_yr", height = "500px")),
+                            div(ggiraphOutput("p_by_i_yr"))
                             
                         )
                     ),  # End Tab Panel Plots
@@ -445,6 +447,7 @@ server <- function(input, output, session) {
             p_by_grade(.df = l_df2[[input$source]], .var = input$source, .pal = input$pal)
             
         })
+  
     
     ## plot by cohort ----
     
@@ -461,20 +464,37 @@ server <- function(input, output, session) {
     
     click("go")
     
-    output$p_by_yr <-
+    
+    output$p_by_i_yr <-
         
-        renderPlot({
+        renderggiraph({
             
             df_in <- l_df1[[input$q]]
             
             if(!is.null(input$gender)) {df_in <- df_in %>% filter(gender %in% input$gender)}
             if(!is.null(input$grade)) {df_in <- df_in %>% filter(grade %in% input$grade)}
             
-            p_by_yr(.df = df_in, .var = input$q, .pal = input$pal) 
+            p_by_i_yr(.df = df_in, .var = input$q, .pal = input$pal) 
             
         }) %>% 
         
         bindEvent(input$go)
+    
+    
+    # output$p_by_yr <-
+    #     
+    #     renderPlot({
+    #         
+    #         df_in <- l_df1[[input$q]]
+    #         
+    #         if(!is.null(input$gender)) {df_in <- df_in %>% filter(gender %in% input$gender)}
+    #         if(!is.null(input$grade)) {df_in <- df_in %>% filter(grade %in% input$grade)}
+    #         
+    #         p_by_yr(.df = df_in, .var = input$q, .pal = input$pal) 
+    #         
+    #     }) %>% 
+    #     
+    #     bindEvent(input$go)
     
     # tables ----
     
@@ -722,13 +742,21 @@ server <- function(input, output, session) {
     
     output$p_df_locale <- 
         
-        renderPlot({
+        # renderPlot({
+        #     
+        #     req(!is.null(input$dt_locale_rows_selected))
+        #     p_by_yr(.df = df_p_locale(), .var = unique(df_p_locale()$q), .pal = input$pal)
+        #     
+        # })
+        
+        renderggiraph({
             
             req(!is.null(input$dt_locale_rows_selected))
-            p_by_yr(.df = df_p_locale(), .var = unique(df_p_locale()$q), .pal = input$pal)
+            p_by_i_yr(.df = df_p_locale(), .var = unique(df_p_locale()$q), .pal = input$pal)
             
         })
     
+
     
     observe({
         
@@ -738,7 +766,8 @@ server <- function(input, output, session) {
                 
                 div(
                     class = "content-box mb20",
-                    plotOutput("p_df_locale")
+                    # plotOutput("p_df_locale")
+                    ggiraphOutput("p_df_locale")
                 ),
                 
                 size = "l", easyClose = TRUE, fade = TRUE
@@ -777,13 +806,22 @@ server <- function(input, output, session) {
             df_mod_gender
         })
     
+    # output$p_df_gender <-
+    # 
+    #     renderPlot({
+    # 
+    #         req(!is.null(input$dt_gender_rows_selected))
+    #         p_by_yr(.df = df_p_gender(), .var = unique(df_p_gender()$q), .pal = input$pal)
+    # 
+    #     })
+    
     output$p_df_gender <-
-
-        renderPlot({
-
+        
+        renderggiraph({
+            
             req(!is.null(input$dt_gender_rows_selected))
-            p_by_yr(.df = df_p_gender(), .var = unique(df_p_gender()$q), .pal = input$pal)
-
+            p_by_i_yr(.df = df_p_gender(), .var = unique(df_p_gender()$q), .pal = input$pal)
+            
         })
     
     observe({
@@ -794,7 +832,8 @@ server <- function(input, output, session) {
 
                 div(
                     class = "content-box mb20",
-                    plotOutput("p_df_gender")
+                    # plotOutput("p_df_gender")
+                    ggiraphOutput("p_df_gender")
                 ),
 
                 size = "l", easyClose = TRUE, fade = TRUE
@@ -834,12 +873,21 @@ server <- function(input, output, session) {
             df_mod_grade
         })
     
+    # output$p_df_grade <-
+    #     
+    #     renderPlot({
+    #         
+    #         req(!is.null(input$dt_grade_rows_selected))
+    #         p_by_yr(.df = df_p_grade(), .var = unique(df_p_grade()$q), .pal = input$pal)
+    #         
+    #     })
+    
     output$p_df_grade <-
         
-        renderPlot({
+        renderggiraph({
             
             req(!is.null(input$dt_grade_rows_selected))
-            p_by_yr(.df = df_p_grade(), .var = unique(df_p_grade()$q), .pal = input$pal)
+            p_by_i_yr(.df = df_p_grade(), .var = unique(df_p_grade()$q), .pal = input$pal)
             
         })
     
@@ -851,7 +899,8 @@ server <- function(input, output, session) {
 
                 div(
                     class = "content-box mb20",
-                    plotOutput("p_df_grade")
+                    # plotOutput("p_df_grade")
+                    ggiraphOutput("p_df_grade")
                 ),
 
                 size = "l", easyClose = TRUE, fade = TRUE
