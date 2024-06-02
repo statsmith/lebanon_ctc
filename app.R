@@ -11,6 +11,7 @@ library(tidyverse)
 library(lubridate)
 library(RColorBrewer)
 library(ggiraph)
+library(visNetwork)
 
 # Constants ----
 
@@ -23,7 +24,10 @@ source(file.path("info.R"))
 d <- readRDS(file.path("data.rds"))
 
 df <- d$df
+
 df_corr <- d$df_corr
+df_edges <- d$df_edges
+df_nodes <-d$df_nodes
 
 l_df1 <- df %>% split(~.$q)
 l_names1 <- names(l_df1)
@@ -340,8 +344,14 @@ ui <- function(req) {
                         title = "Correlations",
                         div(
                             class = "content-box mb20",
-                            "Note: some goofy counter-intuitive correlations - TODO check code, dig into survey domain",
-                            div(DT::dataTableOutput("dt_corr"))
+                            
+                            sliderInput(inputId = "corr", label = "Correlation Cutoff", min = 0.8, max = 1.0, value = 0.95, ticks = FALSE),
+                            
+                            # "Note: some goofy counter-intuitive correlations - TODO check code, dig into survey domain",
+                            # div(DT::dataTableOutput("dt_corr"))
+                            
+                            visNetworkOutput("corr_net")
+                            
                         )
                     )
                     
@@ -986,6 +996,80 @@ server <- function(input, output, session) {
             )
         
     })
+    
+    
+    df_trimmed_net <- 
+        
+        reactive({
+            
+            df_edges_trimmed <- df_edges %>% filter(abs(correlation) >= input$corr)
+            
+            df_nodes_trimmed <-
+                
+                df_nodes %>% 
+                
+                desired_outcome() %>% 
+                
+                inner_join(
+                    df_edges_trimmed %>% 
+                        select(-correlation) %>% 
+                        pivot_longer(cols = everything()) %>% 
+                        distinct(id = value) 
+                )
+            
+            df_nodes_trimmed$shape  <- "dot"  
+            df_nodes_trimmed$shadow <- FALSE 
+            df_nodes_trimmed$title  <- df_nodes_trimmed$source 
+            df_nodes_trimmed$label  <- df_nodes_trimmed$q
+            df_nodes_trimmed$borderWidth <- 0
+            df_nodes_trimmed$chose.label.mod <- "bold"
+            
+            df_nodes_trimmed <-
+                
+                df_nodes_trimmed %>%
+                
+                mutate(color.background = ifelse(desired_outcome == "Low", "lightblue", "lightgreen")) %>% 
+                mutate(color.highlight.background = ifelse(desired_outcome == "Low", "blue", "green")) %>% 
+                mutate(color.hover.background = ifelse(desired_outcome == "Low", "blue", "green")) %>% 
+                mutate(font.color = ifelse(desired_outcome == "Low", "blue", "green"))
+            
+            
+            
+            df_edges_trimmed$color.color <- "grey95"
+            df_edges_trimmed$color.hover <- "black"  
+            # df_edges_trimmed$highlight <- "black"  
+            # df_edges_trimmed$inherit <- "false"  
+            
+            
+            return(list(df_edges_trimmed = df_edges_trimmed, df_nodes_trimmed = df_nodes_trimmed))
+            
+        })
+    
+    output$corr_net <- 
+        
+        renderVisNetwork({
+            
+            req(df_trimmed_net())
+            
+            visNetwork(df_trimmed_net()$df_nodes_trimmed, df_trimmed_net()$df_edges_trimmed) %>% 
+                
+                visNodes(size = 15) %>% 
+                
+                visInteraction(hover = TRUE) %>% 
+                visIgraphLayout(layout = "layout_nicely", physics = TRUE, smooth = TRUE) %>%
+                visOptions(
+                    highlightNearest = 
+                        list(
+                            enabled = TRUE, 
+                            degree = 1,
+                            algorithm = "hierarchical", 
+                            labelOnly = TRUE
+                        ), 
+                    selectedBy = "label"
+                ) %>% 
+                visPhysics (enabled = FALSE)
+            
+        })
     
     
     
