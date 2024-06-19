@@ -28,7 +28,7 @@ df <- d$df
 
 df_corr <- d$df_corr
 df_edges <- d$df_edges
-df_nodes <-d$df_nodes
+df_nodes <-d$df_nodes %>% desired_outcome()
 
 l_df1 <- df %>% split(~.$q)
 l_names1 <- names(l_df1)
@@ -48,7 +48,7 @@ df <- df %>% mutate(year = factor(year, levels = rev(unique(.$year))))
 
 
 # Testing ----
-testing <- !TRUE
+testing <- TRUE
 
 
 ui <- function(req) {
@@ -346,13 +346,64 @@ ui <- function(req) {
                         div(
                             class = "content-box mb20",
                             
-                            sliderInput(inputId = "corr", label = "Correlation Cutoff", min = 0.8, max = 1.0, value = 0.95, ticks = FALSE),
+                            div(
+                                class = "center-flex",
+                                
+                                div(
+                                    class = "margin10",
+                                    
+                                    pickerInput(
+                                        
+                                        inputId = "focus", 
+                                        label = "Focus", 
+                                        choices = 
+                                            
+                                            df_nodes %>% 
+                                            distinct(source, q) %>% 
+                                            arrange(source, q) %>% 
+                                            split(.$source) %>% 
+                                            imap(~.x %>% select(q) %>% rename(!!sym(.y) := q)),
+                                        
+                                        selected = NULL,
+                                        multiple = FALSE,
+                                        width = "150px",
+                                        options = list(
+                                            "actions-box" = TRUE,
+                                            "container" = "body",
+                                            # "none-selected-text" = "All",
+                                            "deselect-all-text" = "Clear",
+                                            "live-search" = TRUE
+                                        )
+                                    )
+                                ),
+                                
+                                div(
+                                    class = "margin10",
+                                    sliderInput(inputId = "corr", label = "Correlation Cutoff", min = 0.5, max = 1.0, value = 0.95, ticks = FALSE, width = "150px")
+                                ),
+                                div(
+                                    class = "margin10",
+                                    sliderInput(inputId = "reach", label = "Reach", min = 1, max = 10, step = 1, value = 2, ticks = FALSE, width = "150px")
+                                )
+                            ),
+                            
+                            div(
+                                class = "center-flex margin10",
+                                "If you do not see a network plot, try reducing the strength of the correlation cutoff or pick another focus"
+                            ),
                             
                             # "Note: some goofy counter-intuitive correlations - TODO check code, dig into survey domain",
                             # div(DT::dataTableOutput("dt_corr"))
                             
-                            visNetworkOutput("corr_net", height = "500px")
+                            visNetworkOutput("corr_net", height = "700px"),
+                            DT::dataTableOutput("dt_connected_nodes")
                             
+                            
+                        ),
+                        
+                        div(
+                            class = "content-box mb20",
+                            dataTableOutput("dt_centrality")
                         )
                     )
                     
@@ -394,11 +445,7 @@ server <- function(input, output, session) {
         if(testing){
             
             print("testing")
-            
-            print("locale")
-            print(input$dt_locale_rows_selected)
-            
-            print(df_p_cohort())
+            print(input$node_selected)
         }
     })
     
@@ -458,7 +505,7 @@ server <- function(input, output, session) {
             p_by_grade(.df = l_df2[[input$source]], .var = input$source, .pal = input$pal)
             
         })
-  
+    
     
     ## plot by cohort ----
     
@@ -625,7 +672,7 @@ server <- function(input, output, session) {
     dt_grade <- 
         
         reactive({
-           
+            
             .df <- 
                 
                 df %>%
@@ -767,7 +814,7 @@ server <- function(input, output, session) {
             
         })
     
-
+    
     
     observe({
         
@@ -805,9 +852,9 @@ server <- function(input, output, session) {
                 select(-contains("iff"), -contains("come")) %>%
                 pivot_longer(cols = c("Female", "Male", "Other", "All"), names_to = "gender", values_to = "percent") %>%
                 rename(q = Question)
-
+            
             names(df_mod_gender) <- str_to_lower(names(df_mod_gender))
-
+            
             df_mod_gender <-
                 df_mod_gender %>%
                 mutate(year = as.numeric(as.character(year))) %>%
@@ -836,23 +883,23 @@ server <- function(input, output, session) {
         })
     
     observe({
-
+        
         showModal(
-
+            
             modalDialog(
-
+                
                 div(
                     class = "content-box mb20",
                     # plotOutput("p_df_gender")
                     ggiraphOutput("p_df_gender")
                 ),
-
+                
                 size = "l", easyClose = TRUE, fade = TRUE
             )
         )
-
+        
     }) %>%
-
+        
         bindEvent(input$dt_gender_rows_selected)
     
     
@@ -872,9 +919,9 @@ server <- function(input, output, session) {
                 pivot_longer(cols = c("6", "8", "10", "12"), names_to = "grade", values_to = "percent") %>%
                 rename(q = Question) %>% 
                 mutate(grade = factor(grade, levels = rev(c("6", "8", "10", "12"))))
-
+            
             names(df_mod_grade) <- str_to_lower(names(df_mod_grade))
-
+            
             df_mod_grade <-
                 df_mod_grade %>%
                 mutate(year = as.numeric(as.character(year))) %>%
@@ -903,23 +950,23 @@ server <- function(input, output, session) {
         })
     
     observe({
-
+        
         showModal(
-
+            
             modalDialog(
-
+                
                 div(
                     class = "content-box mb20",
                     # plotOutput("p_df_grade")
                     ggiraphOutput("p_df_grade")
                 ),
-
+                
                 size = "l", easyClose = TRUE, fade = TRUE
             )
         )
-
+        
     }) %>%
-
+        
         bindEvent(input$dt_grade_rows_selected)
     
     
@@ -941,9 +988,9 @@ server <- function(input, output, session) {
                 pivot_longer(cols = contains("20"), names_to = "cohort", values_to = "percent") %>%
                 rename(q = Question) %>%
                 mutate(cohort = factor(cohort, levels = as.character(seq(2018,2050,2)))) 
-
+            
             names(df_mod_cohort) <- str_to_lower(names(df_mod_cohort))
-
+            
             df_mod_cohort <-
                 df_mod_cohort %>%
                 mutate(grade = as.numeric(as.character(grade)))
@@ -953,35 +1000,37 @@ server <- function(input, output, session) {
     
     
     output$p_df_cohort <-
-
+        
         renderPlot({
-
+            
             req(!is.null(input$dt_cohort_rows_selected))
             p_by_cohort(.df = df_p_cohort(), .var = unique(df_p_cohort()$q), .pal = input$pal)
-
+            
         })
     
     observe({
-
+        
         showModal(
-
+            
             modalDialog(
-
+                
                 div(
                     class = "content-box mb20",
                     plotOutput("p_df_cohort")
                 ),
-
+                
                 size = "l", easyClose = TRUE, fade = TRUE
             )
         )
-
+        
     }) %>%
-
+        
         bindEvent(input$dt_cohort_rows_selected)
     
     
     # correlations ----
+    
+    ## dt ----
     
     output$dt_corr <- DT::renderDataTable({
         
@@ -998,87 +1047,183 @@ server <- function(input, output, session) {
         
     })
     
+    ## igraph ----
     
-    df_trimmed_net <- 
+    g <- 
         
         reactive({
             
             df_edges_trimmed <- df_edges %>% filter(abs(correlation) >= input$corr)
+            g <- graph_from_edgelist(as.matrix(df_edges_trimmed %>% select(-correlation)), directed = FALSE)
             
-            df_nodes_trimmed <-
-                
-                df_nodes %>% 
-                
-                desired_outcome() %>% 
-                
-                inner_join(
-                    df_edges_trimmed %>% 
-                        select(-correlation) %>% 
-                        pivot_longer(cols = everything()) %>% 
-                        distinct(id = value) 
-                )
-            
-            df_nodes_trimmed$shape  <- "dot"  
-            df_nodes_trimmed$shadow <- FALSE 
-            df_nodes_trimmed$title  <- df_nodes_trimmed$source 
-            df_nodes_trimmed$label  <- df_nodes_trimmed$q
-            df_nodes_trimmed$borderWidth <- 0
-            df_nodes_trimmed$chose.label.mod <- "bold"
-            
-            df_nodes_trimmed <-
-                
-                df_nodes_trimmed %>%
-                
-                # mutate(color.background = ifelse(desired_outcome == "Low", "lightblue", "lightgreen")) %>% 
-                # mutate(color.highlight.background = ifelse(desired_outcome == "Low", "blue", "green")) %>% 
-                # mutate(color.hover.background = ifelse(desired_outcome == "Low", "blue", "green")) %>% 
-                
-                mutate(color.background = ifelse(desired_outcome == "Low", "lightblue", "lightgreen")) %>% 
-                mutate(color.highlight.background = ifelse(desired_outcome == "Low", "blue", "green")) %>% 
-                mutate(color.hover.background = ifelse(desired_outcome == "Low", "blue", "green")) %>% 
-                mutate(font.color = ifelse(desired_outcome == "Low", "blue", "green"))
-            
-            
-            
-            df_edges_trimmed$color.color <- "grey95"
-            df_edges_trimmed$color.hover <- "black"  
-            # df_edges_trimmed$highlight <- "black"  
-            # df_edges_trimmed$inherit <- "false"  
-            
-            
-            return(list(df_edges_trimmed = df_edges_trimmed, df_nodes_trimmed = df_nodes_trimmed))
+            g
             
         })
+    
+    ## centrality ----
+    
+    df_centrality <- 
+        
+        reactive({
+            
+            g <- g()
+            
+            ## degree - number of connections
+            df_degree <- 
+                
+                tibble(
+                    degree = degree(g) %>% as.numeric(),
+                    node = degree(g) %>% names()
+                ) 
+            
+            ## betweeness - number of shortest paths through node
+            
+            df_between <- 
+                
+                tibble(
+                    betweeness = betweenness(g) %>% as.numeric(),
+                    node = betweenness(g) %>% names()
+                ) 
+            
+            ## closeness - more central a node is, closer it is to all other nodes
+            # recipricol of sum of length of shortest paths betweenthe node and all other nodes in graph
+            
+            df_close <- 
+                
+                tibble(
+                    closeness = closeness(g) %>% as.numeric(),
+                    node = closeness(g) %>% names()
+                ) 
+            
+            ## eigenvector - high scores = nodes connected to many nodes who themselves have high scores
+            
+            df_evcent <- 
+                
+                tibble(
+                    evcent = evcent(g)$vector %>% as.numeric(),
+                    node = evcent(g)$vector %>% names()
+                ) 
+            
+            ## reach - neighborhood of node
+            ego_size(g, order = input$reach)
+            
+            df_reach <- 
+                
+                tibble(
+                    ego = ego_size(g, order = input$reach) %>% as.numeric(),
+                    node = V(g) %>% names()
+                ) 
+            
+            ## combine
+            
+            df_centrality <-
+                
+                df_degree %>% 
+                left_join(df_between) %>%
+                left_join(df_close) %>% 
+                left_join(df_evcent) %>% 
+                left_join(df_reach) %>% 
+                
+                select(id = node, everything()) %>% 
+                
+                left_join(df_nodes) %>% 
+                
+                mutate(across(c(betweeness, closeness, evcent), ~round(., 4))) 
+            
+            df_centrality
+            
+        })
+    
+    output$dt_centrality <- DT::renderDataTable({
+        
+        df_centrality() %>% 
+            
+            select(
+                Source = source,
+                Question = q,
+                `Desired Outcome` = desired_outcome,
+                Degree = degree,
+                Betweeness = betweeness,
+                Closeness = closeness,
+                `Eignevector Centrality` = evcent,
+                Reach = ego
+                
+            ) %>% 
+            
+            make_dt()
+        
+    })
+    
+    ## visnet ----
     
     output$corr_net <- 
         
         renderVisNetwork({
             
-            req(df_trimmed_net())
+            req(input$focus %in% (df_centrality() %>% pull(q)))
             
-            visNetwork(df_trimmed_net()$df_nodes_trimmed, df_trimmed_net()$df_edges_trimmed) %>% 
-                
-                visNodes(size = 15) %>% 
-                
-                visInteraction(hover = TRUE, multiselect = FALSE) %>% 
+            g <- g()
+            df_centrality <- df_centrality()
+            input_id <- df_centrality %>% filter(q == input$focus) %>% pull(id) 
+            
+            gego <- make_ego_graph(g, order = input$reach, input_id) 
+            
+            l_net <- gego[[1]] %>% toVisNetworkData()
+            
+            l_net$nodes <-
+                l_net$nodes %>% 
+                left_join(df_centrality) %>% 
+                mutate(label = q) %>% 
+                mutate(color = ifelse(desired_outcome == "High", "#ff9896", "#aec7e8")) %>%
+                # mutate(shape = "dot") %>%
+                mutate(title = label) 
+            
+            
+            # visIgraph(gego[[1]]) %>%
+            visNetwork(l_net$nodes, l_net$edges) %>% 
+                visInteraction(hover = TRUE, multiselect = FALSE) %>%
                 visIgraphLayout(layout = "layout_nicely", physics = FALSE, smooth = FALSE) %>%
                 visOptions(
-                    highlightNearest = 
+                    highlightNearest =
                         list(
-                            enabled = TRUE, 
+                            enabled = TRUE,
                             degree = 1,
-                            algorithm = "hierarchical", 
+                            algorithm = "hierarchical",
                             labelOnly = TRUE
                             # hideColor = "grey95"
-                        ), 
-                    selectedBy = "label"
+                        ),
+                    selectedBy = 
+                        list(
+                            variable = "label", 
+                            selected = input$focus,
+                            multiple = FALSE,
+                            main = "Find Me"
+                        )
                     # collapse = TRUE
-                ) %>% 
-                visPhysics(enabled = FALSE)
+                ) %>%
+                visEdges(color = list(color = "#c7c7c7")) %>% 
+                visPhysics(enabled = FALSE) %>% 
+                visEvents(select = "function(properties) {Shiny.onInputChange('node_selected', properties.nodes);}")
             
         })
     
+    observe({
+        visNetworkProxy("corr_net") %>% visGetConnectedNodes(id = input$node_selected)
+    }) %>% 
+        bindEvent(input$node_selected)
     
+    output$dt_connected_nodes <- 
+        
+        DT::renderDataTable({
+            
+            df_centrality() %>% 
+                filter(id %in% c(input$node_selected, input$corr_net_connectedNodes)) %>% 
+                mutate(type = ifelse(id == input$node_selected, "Selected", "Connected")) %>% 
+                arrange(desc(type)) %>% 
+                select(Source = source, Question = q, Type = type) %>% 
+                make_dt()
+            
+        })
     
 } # End server
 
