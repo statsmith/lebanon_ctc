@@ -11,6 +11,7 @@ library(tidyverse)
 library(lubridate)
 library(RColorBrewer)
 library(ggiraph)
+library(igraph)
 library(visNetwork)
 
 # Constants ----
@@ -350,7 +351,7 @@ ui <- function(req) {
                             # "Note: some goofy counter-intuitive correlations - TODO check code, dig into survey domain",
                             # div(DT::dataTableOutput("dt_corr"))
                             
-                            visNetworkOutput("corr_net")
+                            visNetworkOutput("corr_net", height = "500px")
                             
                         )
                     )
@@ -1028,6 +1029,10 @@ server <- function(input, output, session) {
                 
                 df_nodes_trimmed %>%
                 
+                # mutate(color.background = ifelse(desired_outcome == "Low", "lightblue", "lightgreen")) %>% 
+                # mutate(color.highlight.background = ifelse(desired_outcome == "Low", "blue", "green")) %>% 
+                # mutate(color.hover.background = ifelse(desired_outcome == "Low", "blue", "green")) %>% 
+                
                 mutate(color.background = ifelse(desired_outcome == "Low", "lightblue", "lightgreen")) %>% 
                 mutate(color.highlight.background = ifelse(desired_outcome == "Low", "blue", "green")) %>% 
                 mutate(color.hover.background = ifelse(desired_outcome == "Low", "blue", "green")) %>% 
@@ -1055,8 +1060,8 @@ server <- function(input, output, session) {
                 
                 visNodes(size = 15) %>% 
                 
-                visInteraction(hover = TRUE) %>% 
-                visIgraphLayout(layout = "layout_nicely", physics = TRUE, smooth = TRUE) %>%
+                visInteraction(hover = TRUE, multiselect = FALSE) %>% 
+                visIgraphLayout(layout = "layout_nicely", physics = FALSE, smooth = FALSE) %>%
                 visOptions(
                     highlightNearest = 
                         list(
@@ -1064,10 +1069,12 @@ server <- function(input, output, session) {
                             degree = 1,
                             algorithm = "hierarchical", 
                             labelOnly = TRUE
+                            # hideColor = "grey95"
                         ), 
                     selectedBy = "label"
+                    # collapse = TRUE
                 ) %>% 
-                visPhysics (enabled = FALSE)
+                visPhysics(enabled = FALSE)
             
         })
     
