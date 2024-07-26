@@ -48,7 +48,7 @@ df <- df %>% mutate(year = factor(year, levels = rev(unique(.$year))))
 
 
 # Testing ----
-testing <- TRUE
+testing <- !TRUE
 
 
 ui <- function(req) {
@@ -383,7 +383,7 @@ ui <- function(req) {
                                 ),
                                 div(
                                     class = "margin10",
-                                    sliderInput(inputId = "reach", label = "Reach", min = 1, max = 10, step = 1, value = 2, ticks = FALSE, width = "150px")
+                                    sliderInput(inputId = "reach", label = "Reach", min = 1, max = 5, step = 1, value = 2, ticks = FALSE, width = "150px")
                                 )
                             ),
                             
@@ -394,15 +394,40 @@ ui <- function(req) {
                             
                             # "Note: some goofy counter-intuitive correlations - TODO check code, dig into survey domain",
                             # div(DT::dataTableOutput("dt_corr"))
-                            
-                            visNetworkOutput("corr_net", height = "700px"),
-                            DT::dataTableOutput("dt_connected_nodes")
-                            
-                            
+                            div(
+                                class = "center-flex",
+                                visNetworkOutput("corr_net", height = "700px")
+                            )
                         ),
                         
                         div(
                             class = "content-box mb20",
+                            
+                            div(
+                                class = "center-flex mb20",
+                                
+                                tags$p(
+                                    "Click on a node in the network plot.  This table will displays the selected node and the nodes to which it is connected (correlation > correlation cutoff)"
+                                )
+                            ),
+                            
+                            DT::dataTableOutput("dt_connected_nodes")
+                        ),
+                        
+                        div(
+                            
+                            class = "content-box mb20",
+                            
+                            div(
+                                class = "center-flex mb20",
+                               
+                                tags$p(
+                                    "This table displays ",  
+                                    tags$a(href = "https://en.wikipedia.org/wiki/Centrality", " centrality metrics ", target = "_blank"),
+                                    " for the correlation network.  It includes all connected nodes (corrleation > correlation cutoff) regardless of the network focus."
+                                )
+                            ),
+                            
                             dataTableOutput("dt_centrality")
                         )
                     )
@@ -1174,7 +1199,7 @@ server <- function(input, output, session) {
                 l_net$nodes %>% 
                 left_join(df_centrality) %>% 
                 mutate(label = q) %>% 
-                mutate(color = ifelse(desired_outcome == "High", "#ff9896", "#aec7e8")) %>%
+                mutate(color = ifelse(desired_outcome == "Low", "#ff9896", "#aec7e8")) %>%
                 # mutate(shape = "dot") %>%
                 mutate(title = label) 
             
@@ -1197,7 +1222,8 @@ server <- function(input, output, session) {
                             variable = "label", 
                             selected = input$focus,
                             multiple = FALSE,
-                            main = "Find Me"
+                            # main = "Find Me"
+                            highlight = TRUE
                         )
                     # collapse = TRUE
                 ) %>%
@@ -1215,6 +1241,8 @@ server <- function(input, output, session) {
     output$dt_connected_nodes <- 
         
         DT::renderDataTable({
+            
+            req(!is.null(input$node_selected))
             
             df_centrality() %>% 
                 filter(id %in% c(input$node_selected, input$corr_net_connectedNodes)) %>% 
