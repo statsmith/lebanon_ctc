@@ -1,5 +1,4 @@
 
-
 # Libraries ----
 
 library(shiny)
@@ -21,14 +20,13 @@ source(file.path("info.R"))
 
 # Data ----
 
-# df <- read_csv(file.path("df.csv"))
 d <- readRDS(file.path("data.rds"))
 
 df <- d$df
 
 df_corr <- d$df_corr
 df_edges <- d$df_edges
-df_nodes <-d$df_nodes %>% desired_outcome()
+df_nodes <- d$df_nodes %>% desired_outcome(.category = "category")
 
 l_df1 <- df %>% split(~.$q)
 l_names1 <- names(l_df1)
@@ -41,7 +39,7 @@ l_df2 <-
     
     mutate(year = factor(year)) %>% 
     mutate(grade = as.numeric(as.character(grade))) %>% 
-    split(.$source)
+    split(.$category)
 
 # year as numeric for plots, factor for tables
 df <- df %>% mutate(year = factor(year, levels = rev(unique(.$year))))
@@ -81,17 +79,17 @@ ui <- function(req) {
                     
                     ### plots ----
                     tabPanel(
-                        
+
                         title = "Plots",
-                        
+
                         # div(
-                        
+
                         # class = "center-flex",
-                        
+
                         # div(
-                        #     
+                        #
                         #     class = "center-wrap margin30",
-                        #     
+                        #
                         #         "Select data source form the drop-down menu", tags$br(),
                         #         "Data for all students (all genders) is shown in the next two plots (By Grade, By Cohort)", tags$br(),
                         #         "Top Row of Plots: Lebanon county;  Bottom Row of Plots: state of PA", tags$br(),
@@ -99,238 +97,238 @@ ui <- function(req) {
                         #         "x-axis: grade or cohort (making it easy to see how students progress through school)", tags$br(),
                         #         "y-axis: percent (%) of students"
                         # ),
-                        
+
                         div(
-                            
+
                             class = "center-flex",
-                            
+
                             div(
                                 class = "margin10",
-                                
+
                                 pickerInput(
-                                    inputId = "source", 
-                                    label = "", 
-                                    choices = unique(df$source) %>% sort(), 
+                                    inputId = "category",
+                                    label = "",
+                                    choices = unique(df$category) %>% sort(),
                                     multiple = FALSE
                                 )
                             ),
-                            
+
                             div(
                                 class = "margin10",
-                                
+
                                 pickerInput(
-                                    inputId = "pal", 
-                                    label = "", 
-                                    choices = c("Blues", "Set1"), 
+                                    inputId = "pal",
+                                    label = "",
+                                    choices = c("Blues", "Set1"),
                                     multiple = FALSE,
                                     width = "150px"
                                 )
                             )
-                            
+
                         ),
-                        
-                        
+
+
                         div(
-                            
+
                             class = "content-box mb20",
-                            
+
                             div(class = "center-flex medblue em1-5", "Compare Grades"),
                             div(class = "mb20", plotOutput("p_by_grade", height = "500px"))
-                            
+
                         ),
-                        
+
                         div(
-                            
+
                             class = "content-box mb20",
-                            
+
                             div(class = "center-flex medblue em1-5", "Compare Cohorts"),
                             div(class = "mb20", plotOutput("p_by_cohort", height = "500px"))
-                            
+
                         ),
-                        
-                        
+
+
                         div(
-                            
+
                             class = "content-box mb20",
-                            
+
                             div(class = "center-flex medblue em1-5", "Longitudinal Drill Down"),
-                            
+
                             # div(
-                            #     
+                            #
                             #     class = "center-wrap margin30",
-                            #     
+                            #
                             #     "This plot allows the user to drill down into specific demographics for the specific question", tags$br(),
                             #     "The data source is selected at the top of this page", tags$br(),
                             #     "Select the question (within the data source) from the drop down menu", tags$br(),
                             #     "Rows of plots correspond to grade", tags$br(),
                             #     "Columns of plots correspond to gender", tags$br(),
-                            #     "The x-axis is year (of the survey)", tags$br(), 
+                            #     "The x-axis is year (of the survey)", tags$br(),
                             #     "The y-axis is the percent of students"
-                            #     
+                            #
                             # ),
-                            
+
                             div(
-                                
+
                                 class = "center-wrap",
-                                
+
                                 div(
                                     class = "margin10",
-                                    
+
                                     pickerInput(
-                                        inputId = "q", 
-                                        label = "Question", 
-                                        choices = unique(df$q) %>% sort(), 
+                                        inputId = "q",
+                                        label = "Question",
+                                        choices = unique(df$q) %>% sort(),
                                         multiple = FALSE
                                     )
                                 ),
-                                
+
                                 div(
                                     class = "margin10",
-                                    
+
                                     pickerInput(
-                                        inputId = "gender", 
-                                        label = "Gender", 
-                                        choices = unique(levels(df$gender)), 
+                                        inputId = "gender",
+                                        label = "Gender",
+                                        choices = unique(levels(df$gender)),
                                         selected = c("Female", "Male", "Other"),
                                         multiple = TRUE,
                                         width = "150px"
                                     )
                                 ),
-                                
+
                                 div(
                                     class = "margin10",
-                                    
+
                                     pickerInput(
-                                        inputId = "grade", 
-                                        label = "Grade", 
-                                        choices = unique(levels(df$grade)), 
+                                        inputId = "grade",
+                                        label = "Grade",
+                                        choices = unique(levels(df$grade)),
                                         selected = c("12", "10", "8", "6"),
                                         multiple = TRUE,
                                         width = "150px"
                                     )
                                 ),
-                                
+
                                 div(
                                     class = "margin10",
                                     actionLink(inputId = "go", label = "Go", icon = icon("paper-plane"))
                                 )
                             ),
-                            
+
                             # div(plotOutput("p_by_yr", height = "500px")),
-                            div(ggiraphOutput("p_by_i_yr"))
-                            
+                            div(girafeOutput("p_by_i_yr"))
+
                         )
                     ),  # End Tab Panel Plots
                     
                     tabPanel(
-                        
+
                         ### tables ----
                         title = "Tables",
-                        
+
                         tabsetPanel(
-                            
+
                             tabPanel(
-                                
+
                                 title = "By Locale",
-                                
+
                                 div(
-                                    
+
                                     class = "content-box mb20",
-                                    
+
                                     # div(
                                     #     class = "center-flex medblue em1-5",
                                     #     "Differences: By Locale"
                                     # ),
-                                    
+
                                     #     div(
-                                    #         
+                                    #
                                     #         class = "margin30",
-                                    #         
+                                    #
                                     #         "
                                     # This table compares county level data to state level data.
-                                    # Click the grey triangles next to column names to sort. 
+                                    # Click the grey triangles next to column names to sort.
                                     # This makes it easy to find the biggest differences.
                                     # Filter the table using the boxes below each column name.
                                     # Click the Excel button to download the data.
                                     # "
-                                    # 
+                                    #
                                     #     ),
-                                    
+
                                     DT::dataTableOutput("dt_locale")
                                 )
-                                # 
+                                #
                                 # div(
                                 #     class = "content-box mb20",
                                 #     plotOutput("p_df_locale")
                                 # )
                             ),
-                            
+
                             tabPanel(
-                                
+
                                 title = "By Gender",
-                                
+
                                 div(
-                                    
+
                                     class = "content-box mb20",
-                                    
+
                                     # div(
                                     #     class = "center-flex medblue em1-5",
                                     #     "Differences: By Gender"
                                     # ),
-                                    
+
                                     #     div(
-                                    #         
+                                    #
                                     #         class = "margin30",
-                                    #         
+                                    #
                                     #         "
                                     # This table compares data by gender.
-                                    # Click the grey triangles next to column names to sort. 
+                                    # Click the grey triangles next to column names to sort.
                                     # This makes it easy to find the biggest differences.
                                     # Filter the table using the boxes below each column name.
                                     # Click the Excel button to download the data.
                                     # "
-                                    # 
+                                    #
                                     #     ),
-                                    
+
                                     div(DT::dataTableOutput("dt_gender"))
                                 )
                             ),
-                            
+
                             tabPanel(
-                                
+
                                 title = "By Grade",
-                                
+
                                 div(
-                                    
+
                                     class = "content-box mb20",
-                                    
+
                                     # div(
                                     #     class = "center-flex medblue em1-5",
                                     #     "Differences: By Grade"
                                     # ),
-                                    
+
                                     # div(
-                                    #     
+                                    #
                                     #     class = "margin30",
-                                    #     
+                                    #
                                     #     "
                                     #     This table compares data by grade.
-                                    #     Click the grey triangles next to column names to sort. 
-                                    #     This makes it easy to find the biggest differences. 
+                                    #     Click the grey triangles next to column names to sort.
+                                    #     This makes it easy to find the biggest differences.
                                     #     Specifically, what are the biggest challenges as kids go from 6th grade to 8th grade, 8th grade to 10th grade, and 10th grade to 12th grade.
                                     #     Filter the table using the boxes below each column name.
                                     #     Click the Excel button to download the data.
                                     #     "
-                                    #     
+                                    #
                                     # ),
                                     div(DT::dataTableOutput("dt_grade"))
                                 )
                             ),
-                            
+
                             tabPanel(
-                                
+
                                 title = "By Cohort",
-                                
+
                                 div(
                                     class = "content-box mb20",
                                     div(DT::dataTableOutput("dt_cohort"))
@@ -341,29 +339,29 @@ ui <- function(req) {
                     
                     ### correlations ----
                     tabPanel(
-                        
+
                         title = "Correlations",
                         div(
                             class = "content-box mb20",
-                            
+
                             div(
                                 class = "center-flex",
-                                
+
                                 div(
                                     class = "margin10",
-                                    
+
                                     pickerInput(
-                                        
-                                        inputId = "focus", 
-                                        label = "Focus", 
-                                        choices = 
-                                            
-                                            df_nodes %>% 
-                                            distinct(source, q) %>% 
-                                            arrange(source, q) %>% 
-                                            split(.$source) %>% 
+
+                                        inputId = "focus",
+                                        label = "Focus",
+                                        choices =
+
+                                            df_nodes %>%
+                                            distinct(category, q) %>%
+                                            arrange(category, q) %>%
+                                            split(.$category) %>%
                                             imap(~.x %>% select(q) %>% rename(!!sym(.y) := q)),
-                                        
+
                                         selected = NULL,
                                         multiple = FALSE,
                                         width = "150px",
@@ -376,58 +374,59 @@ ui <- function(req) {
                                         )
                                     )
                                 ),
-                                
+
                                 div(
                                     class = "margin10",
                                     sliderInput(inputId = "corr", label = "Correlation Cutoff", min = 0.5, max = 1.0, value = 0.95, ticks = FALSE, width = "150px")
                                 ),
+                                
                                 div(
                                     class = "margin10",
                                     sliderInput(inputId = "reach", label = "Reach", min = 1, max = 5, step = 1, value = 2, ticks = FALSE, width = "150px")
                                 )
                             ),
-                            
+
                             div(
                                 class = "center-flex margin10",
                                 "If you do not see a network plot, try reducing the strength of the correlation cutoff or pick another focus"
                             ),
-                            
+
                             # "Note: some goofy counter-intuitive correlations - TODO check code, dig into survey domain",
-                            # div(DT::dataTableOutput("dt_corr"))
+                            # div(DT::dataTableOutput("dt_corr")),
                             div(
                                 class = "center-flex",
                                 visNetworkOutput("corr_net", height = "700px")
                             )
                         ),
-                        
+
                         div(
                             class = "content-box mb20",
-                            
+
                             div(
                                 class = "center-flex mb20",
-                                
+
                                 tags$p(
                                     "Click on a node in the network plot.  This table will displays the selected node and the nodes to which it is connected (correlation > correlation cutoff)"
                                 )
                             ),
-                            
+
                             DT::dataTableOutput("dt_connected_nodes")
                         ),
-                        
+
                         div(
-                            
+
                             class = "content-box mb20",
-                            
+
                             div(
                                 class = "center-flex mb20",
-                               
+
                                 tags$p(
-                                    "This table displays ",  
+                                    "This table displays ",
                                     tags$a(href = "https://en.wikipedia.org/wiki/Centrality", " centrality metrics ", target = "_blank"),
                                     " for the correlation network.  It includes all connected nodes (corrleation > correlation cutoff) regardless of the network focus."
                                 )
                             ),
-                            
+
                             dataTableOutput("dt_centrality")
                         )
                     )
@@ -502,12 +501,12 @@ server <- function(input, output, session) {
     
     observe({
         
-        questions <- df %>% filter(source == input$source) %>% distinct(q) %>% pull(q) %>% sort()
+        questions <- df %>% filter(category == input$category) %>% distinct(q) %>% pull(q) %>% sort()
         updatePickerInput(session, inputId = "q", label = "Question", choices = questions)
         
     }) %>% 
         
-        bindEvent(input$source)
+        bindEvent(input$category)
     
     # force drill down plot color update
     observe({
@@ -527,7 +526,7 @@ server <- function(input, output, session) {
         
         renderPlot({
             
-            p_by_grade(.df = l_df2[[input$source]], .var = input$source, .pal = input$pal)
+            p_by_grade(.df = l_df2[[input$category]], .var = input$category, .pal = input$pal)
             
         })
     
@@ -538,7 +537,7 @@ server <- function(input, output, session) {
         
         renderPlot({
             
-            p_by_cohort(.df = l_df2[[input$source]], .var = input$source, .pal = input$pal)
+            p_by_cohort(.df = l_df2[[input$category]], .var = input$category, .pal = input$pal)
             
         })
     
@@ -594,25 +593,25 @@ server <- function(input, output, session) {
                 df %>% 
                 select(-cohort) %>% 
                 pivot_wider(names_from = locale, values_from = percent, values_fn = mean) %>% 
-                mutate(leb_state = `Lebanon County` - State) %>% 
+                mutate(leb_state = Lebanon - PA) %>% 
                 arrange(-year, -abs(leb_state)) %>% 
                 desired_outcome() %>% 
                 
                 select(
                     `Desired Outcome` = desired_outcome,
-                    Source = source,
+                    Category = category,
                     Question = q,
                     Year = year,
                     Grade = grade,
                     # Cohort = cohort,
                     Gender = gender,
-                    `Lebanon County`,
-                    State,
-                    `Diff: Lebanon - State` = leb_state
+                    Lebanon,
+                    PA,
+                    `Diff: Lebanon - PA` = leb_state
                     
                 ) %>%
                 
-                mutate(across(c(Source:Gender), ~factor(.))) 
+                mutate(across(c(Category:Gender), ~factor(.))) 
             
             
         })
@@ -654,7 +653,7 @@ server <- function(input, output, session) {
                 
                 select(
                     `Desired Outcome` = desired_outcome,
-                    Source = source,
+                    Category = category,
                     Question = q,
                     Year = year,
                     Grade = grade,
@@ -670,7 +669,7 @@ server <- function(input, output, session) {
                     
                 ) %>%
                 
-                mutate(across(c(Source:Locale), ~factor(.)))
+                mutate(across(c(Category:Locale), ~factor(.)))
         })
     
     
@@ -714,7 +713,7 @@ server <- function(input, output, session) {
                 
                 select(
                     `Desired Outcome` = desired_outcome,
-                    Source = source,
+                    Category = category,
                     Question = q,
                     Year = year,
                     Gender = gender,
@@ -727,7 +726,7 @@ server <- function(input, output, session) {
                     
                 ) %>%
                 
-                mutate(across(c(Source:Locale), ~factor(.))) %>% 
+                mutate(across(c(Category:Locale), ~factor(.))) %>% 
                 mutate(across(c(`Diff: 12-10`, `Diff: 10-8`, `Diff: 8-6`), ~as.numeric(.)))
             
         })
@@ -766,7 +765,7 @@ server <- function(input, output, session) {
                 
                 select(
                     `Desired Outcome` = desired_outcome,
-                    Source = source,
+                    Category = category,
                     Question = q,
                     # Year = year,
                     Grade = grade,
@@ -776,7 +775,7 @@ server <- function(input, output, session) {
                     
                 ) %>%
                 
-                mutate(across(c(Source:Locale), ~factor(.))) 
+                mutate(across(c(Category:Locale), ~factor(.))) 
             
         })
     
@@ -806,10 +805,10 @@ server <- function(input, output, session) {
                 
                 dt_locale() %>% 
                 slice(input$dt_locale_rows_selected) %>% 
-                select(Source, Question) %>% 
+                select(Category, Question) %>% 
                 inner_join(dt_locale()) %>% 
                 select(-contains("iff"), -contains("come")) %>% 
-                pivot_longer(cols = c("Lebanon County", "State"), names_to = "locale", values_to = "percent") %>% 
+                pivot_longer(cols = c("Lebanon", "PA"), names_to = "locale", values_to = "percent") %>% 
                 rename(q = Question)
             
             names(df_mod_locale) <- str_to_lower(names(df_mod_locale))
@@ -850,7 +849,7 @@ server <- function(input, output, session) {
                 div(
                     class = "content-box mb20",
                     # plotOutput("p_df_locale")
-                    ggiraphOutput("p_df_locale")
+                    girafeOutput("p_df_locale")
                 ),
                 
                 size = "l", easyClose = TRUE, fade = TRUE
@@ -872,7 +871,7 @@ server <- function(input, output, session) {
                 
                 dt_gender() %>% 
                 slice(input$dt_gender_rows_selected) %>% 
-                select(Source, Question) %>%
+                select(Category, Question) %>%
                 inner_join(dt_gender()) %>% 
                 select(-contains("iff"), -contains("come")) %>%
                 pivot_longer(cols = c("Female", "Male", "Other", "All"), names_to = "gender", values_to = "percent") %>%
@@ -916,7 +915,7 @@ server <- function(input, output, session) {
                 div(
                     class = "content-box mb20",
                     # plotOutput("p_df_gender")
-                    ggiraphOutput("p_df_gender")
+                    girafeOutput("p_df_gender")
                 ),
                 
                 size = "l", easyClose = TRUE, fade = TRUE
@@ -938,7 +937,7 @@ server <- function(input, output, session) {
                 
                 dt_grade() %>% 
                 slice(input$dt_grade_rows_selected) %>% 
-                select(Source, Question) %>%
+                select(Category, Question) %>%
                 inner_join(dt_grade()) %>% 
                 select(-contains("iff"), -contains("come")) %>%
                 pivot_longer(cols = c("6", "8", "10", "12"), names_to = "grade", values_to = "percent") %>%
@@ -983,7 +982,7 @@ server <- function(input, output, session) {
                 div(
                     class = "content-box mb20",
                     # plotOutput("p_df_grade")
-                    ggiraphOutput("p_df_grade")
+                    girafeOutput("p_df_grade")
                 ),
                 
                 size = "l", easyClose = TRUE, fade = TRUE
@@ -1006,7 +1005,7 @@ server <- function(input, output, session) {
                 
                 dt_cohort() %>% 
                 slice(input$dt_cohort_rows_selected) %>% 
-                select(Source, Question, Locale, Gender) %>%
+                select(Category, Question, Locale, Gender) %>%
                 inner_join(dt_cohort()) %>%
                 
                 select(-contains("iff"), -contains("come")) %>%
@@ -1078,8 +1077,8 @@ server <- function(input, output, session) {
         
         reactive({
             
-            df_edges_trimmed <- df_edges %>% filter(abs(correlation) >= input$corr)
-            g <- graph_from_edgelist(as.matrix(df_edges_trimmed %>% select(-correlation)), directed = FALSE)
+            df_edges_trimmed <- df_edges %>% filter(abs(corr) >= input$corr)
+            g <- graph_from_edgelist(as.matrix(df_edges_trimmed %>% select(-corr)), directed = FALSE)
             
             g
             
@@ -1164,7 +1163,7 @@ server <- function(input, output, session) {
         df_centrality() %>% 
             
             select(
-                Source = source,
+                Category = category,
                 Question = q,
                 `Desired Outcome` = desired_outcome,
                 Degree = degree,
@@ -1248,7 +1247,7 @@ server <- function(input, output, session) {
                 filter(id %in% c(input$node_selected, input$corr_net_connectedNodes)) %>% 
                 mutate(type = ifelse(id == input$node_selected, "Selected", "Connected")) %>% 
                 arrange(desc(type)) %>% 
-                select(Source = source, Question = q, Type = type) %>% 
+                select(Category = category, Question = q, Type = type) %>% 
                 make_dt()
             
         })
