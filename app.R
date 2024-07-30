@@ -23,10 +23,11 @@ source(file.path("info.R"))
 d <- readRDS(file.path("data.rds"))
 
 df <- d$df
+df_ref <- d$df_ref
 
 df_corr <- d$df_corr
 df_edges <- d$df_edges
-df_nodes <- d$df_nodes %>% desired_outcome(.category = "category")
+df_nodes <- d$df_nodes 
 
 l_df1 <- df %>% split(~.$q)
 l_names1 <- names(l_df1)
@@ -42,6 +43,7 @@ l_df2 <-
     split(.$category)
 
 # year as numeric for plots, factor for tables
+# note: df used above, need to convert to factor afterwards (here)
 df <- df %>% mutate(year = factor(year, levels = rev(unique(.$year))))
 
 
@@ -595,7 +597,7 @@ server <- function(input, output, session) {
                 pivot_wider(names_from = locale, values_from = percent, values_fn = mean) %>% 
                 mutate(leb_state = Lebanon - PA) %>% 
                 arrange(-year, -abs(leb_state)) %>% 
-                desired_outcome() %>% 
+                # desired_outcome() %>% 
                 
                 select(
                     `Desired Outcome` = desired_outcome,
@@ -649,7 +651,7 @@ server <- function(input, output, session) {
                 mutate(om_diff = Other - Male) %>% 
                 mutate(of_diff = Other - Female) %>% 
                 arrange(-year, -abs(fm_diff)) %>% 
-                desired_outcome() %>% 
+                # desired_outcome() %>% 
                 
                 select(
                     `Desired Outcome` = desired_outcome,
@@ -709,7 +711,7 @@ server <- function(input, output, session) {
                 mutate(g10g8 = `10` - `8`) %>% 
                 mutate(g8g6 = `8` - `6`) %>% 
                 arrange(-year, -abs(g8g6)) %>% 
-                desired_outcome() %>% 
+                # desired_outcome() %>% 
                 
                 select(
                     `Desired Outcome` = desired_outcome,
@@ -761,7 +763,7 @@ server <- function(input, output, session) {
                 # count(cohort) %>% 
                 select(-year) %>%
                 pivot_wider(names_from = cohort, values_from = percent, values_fn = mean) %>% 
-                desired_outcome() %>% 
+                # desired_outcome() %>% 
                 
                 select(
                     `Desired Outcome` = desired_outcome,
@@ -1197,13 +1199,12 @@ server <- function(input, output, session) {
             l_net$nodes <-
                 l_net$nodes %>% 
                 left_join(df_centrality) %>% 
-                mutate(label = q) %>% 
+                mutate(label = q) %>%
+                # mutate(label = )
+                
                 mutate(color = ifelse(desired_outcome == "Low", "#ff9896", "#aec7e8")) %>%
-                # mutate(shape = "dot") %>%
                 mutate(title = label) 
             
-            
-            # visIgraph(gego[[1]]) %>%
             visNetwork(l_net$nodes, l_net$edges) %>% 
                 visInteraction(hover = TRUE, multiselect = FALSE) %>%
                 visIgraphLayout(layout = "layout_nicely", physics = FALSE, smooth = FALSE) %>%
