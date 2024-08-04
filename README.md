@@ -5,15 +5,15 @@ Lebanon PA Communities That Care
 
 # Objective
 
+The objective of this app is to give community leaders the ability to interact with and explore the PA Youth Survey 
 
 # Background
 
-
+Lebanon County ...
 
 # TODO
 
-These would serve nicely as a summer intern project
-
+This app would serve nicely as a starting point for a student project
 
 * Clean up special characters (UTF-8)
 * Clean up code - it's messy; streamline, simplify

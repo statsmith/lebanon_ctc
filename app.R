@@ -48,7 +48,7 @@ df <- df %>% mutate(year = factor(year, levels = rev(unique(.$year))))
 
 
 # Testing ----
-testing <- TRUE
+testing <- !TRUE
 
 
 ui <- function(req) {
@@ -440,7 +440,17 @@ ui <- function(req) {
                                 )
                             ),
                             
-                            dataTableOutput("dt_centrality")
+                            dataTableOutput("dt_centrality"),
+                            
+                            tags$br(), tags$br(),
+                            tags$ul(
+                                tags$li(tags$b("Degree: "), "# of nodes a node is connected to"),
+                                tags$li(tags$b("Betweeness: "), "# of times a node acts as a bridge along shortest path between two other nodes."),
+                                tags$li(tags$b("Closeness: "), "ave length of shortest path between node and all other nodes.  The more central a node is, the closer it is to all other nodes"),
+                                tags$li(tags$b("Eigenvector Centrality: "), "nodes connected to other highly connected nodes have high Eignevector Centrality."),
+                                tags$li(tags$b("Reach: "), "# of nodes a node can reach in 2 steps or less")
+                            )
+                            
                         )
                     )
                     
