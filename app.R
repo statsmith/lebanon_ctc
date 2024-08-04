@@ -79,6 +79,17 @@ ui <- function(req) {
                 
                 tabsetPanel(
                     
+                    ### Ref ----
+                    tabPanel(
+                        title = "Reference",
+                        div(
+                            
+                            class = "content-box mb20",
+                            DT::dataTableOutput("dt_ref")
+                        )
+                    ),
+                    
+                    
                     ### plots ----
                     tabPanel(
                         
@@ -523,6 +534,14 @@ server <- function(input, output, session) {
     }) %>% 
         
         bindEvent(input$pal)
+    
+    # ref ----
+    
+    output$dt_ref <- 
+        
+        DT::renderDataTable(
+            df_ref %>% make_dt()
+        )
     
     # plots ----
     

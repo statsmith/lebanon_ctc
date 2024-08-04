@@ -14,11 +14,9 @@ Lebanon PA Communities That Care
 
 These would serve nicely as a summer intern project
 
-* Include both ways on correlations
-* Create module or function for pop up modals
-* Customize pop up plot for gender, for each pop up, to emphasize comparisons (default was to use already available function)
+
+* Clean up special characters (UTF-8)
 * Clean up code - it's messy; streamline, simplify
-* Check counter-intuitive correlations
 * Documentation
 * Training
 
