@@ -760,8 +760,8 @@ server <- function(input, output, session) {
                 
                 df %>% 
                 filter(!is.na(cohort)) %>% 
-                # count(cohort) %>% 
                 select(-year) %>%
+                arrange(cohort) %>% # force column order
                 pivot_wider(names_from = cohort, values_from = percent, values_fn = mean) %>% 
                 # desired_outcome() %>% 
                 
