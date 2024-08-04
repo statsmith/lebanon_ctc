@@ -24,6 +24,7 @@ These would serve nicely as a summer intern project
 
 # Log
 
+* 2024 07 27 wire in data from survey supplier
 * 2024 05 23 add modal plot for local DT
 * 2024 05 19 added correlation tab
 * 2024 05 19 added cohorts table
