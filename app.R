@@ -48,7 +48,7 @@ df <- df %>% mutate(year = factor(year, levels = rev(unique(.$year))))
 
 
 # Testing ----
-testing <- !TRUE
+testing <- TRUE
 
 
 ui <- function(req) {
@@ -81,13 +81,13 @@ ui <- function(req) {
                     
                     ### plots ----
                     tabPanel(
-
+                        
                         title = "Plots",
-
+                        
                         # div(
-
+                        
                         # class = "center-flex",
-
+                        
                         # div(
                         #
                         #     class = "center-wrap margin30",
@@ -99,14 +99,14 @@ ui <- function(req) {
                         #         "x-axis: grade or cohort (making it easy to see how students progress through school)", tags$br(),
                         #         "y-axis: percent (%) of students"
                         # ),
-
+                        
                         div(
-
+                            
                             class = "center-flex",
-
+                            
                             div(
                                 class = "margin10",
-
+                                
                                 pickerInput(
                                     inputId = "category",
                                     label = "",
@@ -114,10 +114,10 @@ ui <- function(req) {
                                     multiple = FALSE
                                 )
                             ),
-
+                            
                             div(
                                 class = "margin10",
-
+                                
                                 pickerInput(
                                     inputId = "pal",
                                     label = "",
@@ -126,35 +126,35 @@ ui <- function(req) {
                                     width = "150px"
                                 )
                             )
-
+                            
                         ),
-
-
+                        
+                        
                         div(
-
+                            
                             class = "content-box mb20",
-
+                            
                             div(class = "center-flex medblue em1-5", "Compare Grades"),
                             div(class = "mb20", plotOutput("p_by_grade", height = "500px"))
-
+                            
                         ),
-
+                        
                         div(
-
+                            
                             class = "content-box mb20",
-
+                            
                             div(class = "center-flex medblue em1-5", "Compare Cohorts"),
                             div(class = "mb20", plotOutput("p_by_cohort", height = "500px"))
-
+                            
                         ),
-
-
+                        
+                        
                         div(
-
+                            
                             class = "content-box mb20",
-
+                            
                             div(class = "center-flex medblue em1-5", "Longitudinal Drill Down"),
-
+                            
                             # div(
                             #
                             #     class = "center-wrap margin30",
@@ -168,14 +168,14 @@ ui <- function(req) {
                             #     "The y-axis is the percent of students"
                             #
                             # ),
-
+                            
                             div(
-
+                                
                                 class = "center-wrap",
-
+                                
                                 div(
                                     class = "margin10",
-
+                                    
                                     pickerInput(
                                         inputId = "q",
                                         label = "Question",
@@ -183,10 +183,10 @@ ui <- function(req) {
                                         multiple = FALSE
                                     )
                                 ),
-
+                                
                                 div(
                                     class = "margin10",
-
+                                    
                                     pickerInput(
                                         inputId = "gender",
                                         label = "Gender",
@@ -196,10 +196,10 @@ ui <- function(req) {
                                         width = "150px"
                                     )
                                 ),
-
+                                
                                 div(
                                     class = "margin10",
-
+                                    
                                     pickerInput(
                                         inputId = "grade",
                                         label = "Grade",
@@ -209,39 +209,39 @@ ui <- function(req) {
                                         width = "150px"
                                     )
                                 ),
-
+                                
                                 div(
                                     class = "margin10",
                                     actionLink(inputId = "go", label = "Go", icon = icon("paper-plane"))
                                 )
                             ),
-
+                            
                             # div(plotOutput("p_by_yr", height = "500px")),
                             div(girafeOutput("p_by_i_yr"))
-
+                            
                         )
                     ),  # End Tab Panel Plots
                     
                     tabPanel(
-
+                        
                         ### tables ----
                         title = "Tables",
-
+                        
                         tabsetPanel(
-
+                            
                             tabPanel(
-
+                                
                                 title = "By Locale",
-
+                                
                                 div(
-
+                                    
                                     class = "content-box mb20",
-
+                                    
                                     # div(
                                     #     class = "center-flex medblue em1-5",
                                     #     "Differences: By Locale"
                                     # ),
-
+                                    
                                     #     div(
                                     #
                                     #         class = "margin30",
@@ -255,7 +255,7 @@ ui <- function(req) {
                                     # "
                                     #
                                     #     ),
-
+                                    
                                     DT::dataTableOutput("dt_locale")
                                 )
                                 #
@@ -264,20 +264,20 @@ ui <- function(req) {
                                 #     plotOutput("p_df_locale")
                                 # )
                             ),
-
+                            
                             tabPanel(
-
+                                
                                 title = "By Gender",
-
+                                
                                 div(
-
+                                    
                                     class = "content-box mb20",
-
+                                    
                                     # div(
                                     #     class = "center-flex medblue em1-5",
                                     #     "Differences: By Gender"
                                     # ),
-
+                                    
                                     #     div(
                                     #
                                     #         class = "margin30",
@@ -291,24 +291,24 @@ ui <- function(req) {
                                     # "
                                     #
                                     #     ),
-
+                                    
                                     div(DT::dataTableOutput("dt_gender"))
                                 )
                             ),
-
+                            
                             tabPanel(
-
+                                
                                 title = "By Grade",
-
+                                
                                 div(
-
+                                    
                                     class = "content-box mb20",
-
+                                    
                                     # div(
                                     #     class = "center-flex medblue em1-5",
                                     #     "Differences: By Grade"
                                     # ),
-
+                                    
                                     # div(
                                     #
                                     #     class = "margin30",
@@ -326,11 +326,11 @@ ui <- function(req) {
                                     div(DT::dataTableOutput("dt_grade"))
                                 )
                             ),
-
+                            
                             tabPanel(
-
+                                
                                 title = "By Cohort",
-
+                                
                                 div(
                                     class = "content-box mb20",
                                     div(DT::dataTableOutput("dt_cohort"))
@@ -341,29 +341,29 @@ ui <- function(req) {
                     
                     ### correlations ----
                     tabPanel(
-
+                        
                         title = "Correlations",
                         div(
                             class = "content-box mb20",
-
+                            
                             div(
                                 class = "center-flex",
-
+                                
                                 div(
                                     class = "margin10",
-
+                                    
                                     pickerInput(
-
+                                        
                                         inputId = "focus",
                                         label = "Focus",
                                         choices =
-
+                                            
                                             df_nodes %>%
                                             distinct(category, q) %>%
                                             arrange(category, q) %>%
                                             split(.$category) %>%
                                             imap(~.x %>% select(q) %>% rename(!!sym(.y) := q)),
-
+                                        
                                         selected = NULL,
                                         multiple = FALSE,
                                         width = "150px",
@@ -376,7 +376,7 @@ ui <- function(req) {
                                         )
                                     )
                                 ),
-
+                                
                                 div(
                                     class = "margin10",
                                     sliderInput(inputId = "corr", label = "Correlation Cutoff", min = 0.5, max = 1.0, value = 0.95, ticks = FALSE, width = "150px")
@@ -387,12 +387,12 @@ ui <- function(req) {
                                     sliderInput(inputId = "reach", label = "Reach", min = 1, max = 5, step = 1, value = 2, ticks = FALSE, width = "150px")
                                 )
                             ),
-
+                            
                             div(
                                 class = "center-flex margin10",
                                 "If you do not see a network plot, try reducing the strength of the correlation cutoff or pick another focus"
                             ),
-
+                            
                             # "Note: some goofy counter-intuitive correlations - TODO check code, dig into survey domain",
                             # div(DT::dataTableOutput("dt_corr")),
                             div(
@@ -400,35 +400,35 @@ ui <- function(req) {
                                 visNetworkOutput("corr_net", height = "700px")
                             )
                         ),
-
+                        
                         div(
                             class = "content-box mb20",
-
+                            
                             div(
                                 class = "center-flex mb20",
-
+                                
                                 tags$p(
                                     "Click on a node in the network plot.  This table will displays the selected node and the nodes to which it is connected (correlation > correlation cutoff)"
                                 )
                             ),
-
+                            
                             DT::dataTableOutput("dt_connected_nodes")
                         ),
-
+                        
                         div(
-
+                            
                             class = "content-box mb20",
-
+                            
                             div(
                                 class = "center-flex mb20",
-
+                                
                                 tags$p(
                                     "This table displays ",
                                     tags$a(href = "https://en.wikipedia.org/wiki/Centrality", " centrality metrics ", target = "_blank"),
-                                    " for the correlation network.  It includes all connected nodes (corrleation > correlation cutoff) regardless of the network focus."
+                                    " for the correlation network.  It includes all connected nodes (correlation > correlation cutoff) regardless of the network focus."
                                 )
                             ),
-
+                            
                             dataTableOutput("dt_centrality")
                         )
                     )
@@ -472,6 +472,11 @@ server <- function(input, output, session) {
             
             print("testing")
             print(input$node_selected)
+            print(input$focus)
+            
+            x <- df_nodes %>% filter(q == input$focus) %>% pull(id)
+            print(x)
+            
         }
     })
     
@@ -1242,14 +1247,42 @@ server <- function(input, output, session) {
         
         DT::renderDataTable({
             
-            req(!is.null(input$node_selected))
+            # req(!is.null(input$node_selected))
             
-            df_centrality() %>% 
-                filter(id %in% c(input$node_selected, input$corr_net_connectedNodes)) %>% 
-                mutate(type = ifelse(id == input$node_selected, "Selected", "Connected")) %>% 
-                arrange(desc(type)) %>% 
-                select(Category = category, Question = q, Type = type) %>% 
+            req(input$focus)
+            
+            input_qid <- 
+                ifelse(
+                    is.null(input$node_selected), 
+                    # input$focus, 
+                    df_nodes %>% filter(q == input$focus) %>% pull(id),
+                    input$node_selected
+                )
+            
+            df_corr %>% 
+                filter(qid1 == input_qid) %>% 
+                filter(abs(corr) >= input$corr) %>%
+                select(cat1, q1, corr, cat2, q2) %>% 
+                
+                bind_rows(
+                    
+                    df_corr %>% 
+                        filter(qid2 == input_qid) %>% 
+                        filter(abs(corr) >= input$corr) %>%
+                        select(cat1 = cat2, q1 = q2, corr, cat2 = cat1, q2 = q1)
+                    
+                ) %>% 
+                
+                arrange(-corr) %>% 
                 make_dt()
+            
+            
+            # df_centrality() %>% 
+            #     filter(id %in% c(input$node_selected, input$corr_net_connectedNodes)) %>% 
+            #     mutate(type = ifelse(id == input$node_selected, "Selected", "Connected")) %>% 
+            #     arrange(desc(type)) %>% 
+            #     select(Category = category, Question = q, Type = type) %>% 
+            #     make_dt()
             
         })
     
