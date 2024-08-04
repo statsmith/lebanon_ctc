@@ -18,7 +18,7 @@ p_by_i_yr <-
                     y = percent, 
                     col = locale,
                     tooltip = paste0(
-                        source, " <br> ",
+                        category, " <br> ",
                         q, " <br> ",
                         year," <br> ",
                         locale," <br> ",
@@ -35,15 +35,17 @@ p_by_i_yr <-
             
             facet_grid(grade ~ gender) +
             
-            ggtitle(unique(.df$source), subtitle = .var) +
+            ggtitle(unique(.df$category), subtitle = .var) +
             xlab("Year") +
             ylab("") +
             
             scale_y_continuous(labels = scales::percent_format()) +
+            
             scale_x_continuous(
                 limits = c(min(.df$year) - 0.37, max(.df$year) + 0.37),
                 breaks = .df %>% distinct(year) %>% pull(year)
             ) +
+            
             expand_limits(y = 0) +
             
             # scale_color_brewer(palette = .pal) +
@@ -278,27 +280,51 @@ p_by_cohort <- function(.df, .var, .pal = "Blues"){
 }
 
 
-desired_outcome <- function(.df, .source = "source", .q = "q"){
-    
-    .df %>% 
-        
-        # distinct(source, q) %>% 
-        
-        mutate(
-            
-            desired_outcome = 
-                
-                case_when(
-                    grepl(pattern = "^attitude|involve|^positive|^percept|^protective", !!sym(.source), ignore.case = TRUE) ~ "High",
-                    grepl(pattern = "adults would think it was wrong|would be caught by the police|knows where i am|clear family rules|rules in family", !!sym(.q), ignore.case = TRUE) ~ "High",
-                    grepl(pattern = "I was not bullied", !!sym(.q), ignore.case = TRUE) ~ "High",
-                    grepl("^No", !!sym(.q), ignore.case = TRUE) & grepl("Bullying Freq", !!sym(.source), ignore.case = TRUE) ~ "High",
-                    TRUE ~ "Low"
-                )
-        ) %>% 
-        
-        mutate(desired_outcome = factor(desired_outcome))
-}
+# desired_outcome <- 
+#     
+#     function(.df, .category = "category", .q = "q"){
+#         
+#         .df %>% 
+#             
+#             # distinct(source, q) %>% 
+#             
+#             mutate(
+#                 
+#                 desired_outcome = 
+#                     
+#                     case_when(
+#                         grepl(pattern = "^attitude|involve|^positive|^percept|^protective", !!sym(.category), ignore.case = TRUE) ~ "High",
+#                         grepl(pattern = "adults would think it was wrong|would be caught by the police|knows where i am|clear family rules|rules in family", !!sym(.q), ignore.case = TRUE) ~ "High",
+#                         grepl(pattern = "I was not bullied", !!sym(.q), ignore.case = TRUE) ~ "High",
+#                         grepl("^No", !!sym(.q), ignore.case = TRUE) & grepl("Bullying Freq", !!sym(.category), ignore.case = TRUE) ~ "High",
+#                         TRUE ~ "Low"
+#                     )
+#             ) %>% 
+#             
+#             mutate(desired_outcome = factor(desired_outcome))
+#     }
+
+# desired_outcome <- function(.df, .source = "source", .q = "q"){
+#     
+#     .df %>% 
+#         
+#         # distinct(source, q) %>% 
+#         
+#         mutate(
+#             
+#             desired_outcome = 
+#                 
+#                 case_when(
+#                     grepl(pattern = "^attitude|involve|^positive|^percept|^protective", !!sym(.source), ignore.case = TRUE) ~ "High",
+#                     grepl(pattern = "adults would think it was wrong|would be caught by the police|knows where i am|clear family rules|rules in family", !!sym(.q), ignore.case = TRUE) ~ "High",
+#                     grepl(pattern = "I was not bullied", !!sym(.q), ignore.case = TRUE) ~ "High",
+#                     grepl("^No", !!sym(.q), ignore.case = TRUE) & grepl("Bullying Freq", !!sym(.source), ignore.case = TRUE) ~ "High",
+#                     TRUE ~ "Low"
+#                 )
+#         ) %>% 
+#         
+#         mutate(desired_outcome = factor(desired_outcome))
+# }
 
 make_dt <- function(.df){
     
