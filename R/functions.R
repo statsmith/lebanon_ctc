@@ -333,7 +333,7 @@ make_dt <- function(.df){
     datatable(
         options = list(
             dom = "Bftip",
-            buttons = c('excel'),
+            buttons = c('excel', 'colvis'),
             pageLength = 100, 
             scrollY = 400, 
             scrollX = TRUE,

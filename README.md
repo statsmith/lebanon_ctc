@@ -15,13 +15,17 @@ Lebanon County ...
 
 This app would serve nicely as a starting point for a student project
 
-* Clean up special characters (UTF-8)
+* Add question info to By Gender, By Grade, By Cohort tables
 * Clean up code - it's messy; streamline, simplify
 * Documentation
 * Training
 
 # Log
 
+* 2024 09 10 turned off reference tab - references in default table
+* 2024 09 10 turned off plots tab 
+* 2024 09 10 added question into to By Locale DT
+* 2024 09 10 addressed special characters
 * 2024 07 27 wire in data from survey supplier
 * 2024 05 23 add modal plot for local DT
 * 2024 05 19 added correlation tab

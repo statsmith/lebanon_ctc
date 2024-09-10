@@ -79,164 +79,169 @@ ui <- function(req) {
                 
                 tabsetPanel(
                     
-                    ### Ref ----
-                    tabPanel(
-                        title = "Reference",
-                        div(
-                            
-                            class = "content-box mb20",
-                            DT::dataTableOutput("dt_ref")
-                        )
-                    ),
+                    # ### Ref ----
+                    # tabPanel(
+                    #     title = "Reference",
+                    #     div(
+                    #         
+                    #         class = "content-box mb20",
+                    #         DT::dataTableOutput("dt_ref")
+                    #     )
+                    # ),
                     
                     
                     ### plots ----
-                    tabPanel(
-                        
-                        title = "Plots",
-                        
-                        # div(
-                        
-                        # class = "center-flex",
-                        
-                        # div(
-                        #
-                        #     class = "center-wrap margin30",
-                        #
-                        #         "Select data source form the drop-down menu", tags$br(),
-                        #         "Data for all students (all genders) is shown in the next two plots (By Grade, By Cohort)", tags$br(),
-                        #         "Top Row of Plots: Lebanon county;  Bottom Row of Plots: state of PA", tags$br(),
-                        #         "Columns of Plots: questions in the selected data source", tags$br(),
-                        #         "x-axis: grade or cohort (making it easy to see how students progress through school)", tags$br(),
-                        #         "y-axis: percent (%) of students"
-                        # ),
-                        
-                        div(
-                            
-                            class = "center-flex",
-                            
-                            div(
-                                class = "margin10",
-                                
-                                pickerInput(
-                                    inputId = "category",
-                                    label = "",
-                                    choices = unique(df$category) %>% sort(),
-                                    multiple = FALSE
-                                )
-                            ),
-                            
-                            div(
-                                class = "margin10",
-                                
-                                pickerInput(
-                                    inputId = "pal",
-                                    label = "",
-                                    choices = c("Blues", "Set1"),
-                                    multiple = FALSE,
-                                    width = "150px"
-                                )
-                            )
-                            
-                        ),
-                        
-                        
-                        div(
-                            
-                            class = "content-box mb20",
-                            
-                            div(class = "center-flex medblue em1-5", "Compare Grades"),
-                            div(class = "mb20", plotOutput("p_by_grade", height = "500px"))
-                            
-                        ),
-                        
-                        div(
-                            
-                            class = "content-box mb20",
-                            
-                            div(class = "center-flex medblue em1-5", "Compare Cohorts"),
-                            div(class = "mb20", plotOutput("p_by_cohort", height = "500px"))
-                            
-                        ),
-                        
-                        
-                        div(
-                            
-                            class = "content-box mb20",
-                            
-                            div(class = "center-flex medblue em1-5", "Longitudinal Drill Down"),
-                            
+                    # tabPanel(
+                    #     
+                    #     title = "Plots",
+                    #     
+                    #     # div(
+                    #     
+                    #     # class = "center-flex",
+                    #     
+                    #     # div(
+                    #     #
+                    #     #     class = "center-wrap margin30",
+                    #     #
+                    #     #         "Select data source form the drop-down menu", tags$br(),
+                    #     #         "Data for all students (all genders) is shown in the next two plots (By Grade, By Cohort)", tags$br(),
+                    #     #         "Top Row of Plots: Lebanon county;  Bottom Row of Plots: state of PA", tags$br(),
+                    #     #         "Columns of Plots: questions in the selected data source", tags$br(),
+                    #     #         "x-axis: grade or cohort (making it easy to see how students progress through school)", tags$br(),
+                    #     #         "y-axis: percent (%) of students"
+                    #     # ),
+                    #     
+                    #     div(
+                    #         
+                    #         class = "center-flex",
+                    #         
+                    #         div(
+                    #             class = "margin10",
+                    #             
+                    #             pickerInput(
+                    #                 inputId = "category",
+                    #                 label = "",
+                    #                 choices = unique(df$category) %>% sort(),
+                    #                 multiple = FALSE
+                    #             )
+                    #         ),
+                    #         
                             # div(
-                            #
-                            #     class = "center-wrap margin30",
-                            #
-                            #     "This plot allows the user to drill down into specific demographics for the specific question", tags$br(),
-                            #     "The data source is selected at the top of this page", tags$br(),
-                            #     "Select the question (within the data source) from the drop down menu", tags$br(),
-                            #     "Rows of plots correspond to grade", tags$br(),
-                            #     "Columns of plots correspond to gender", tags$br(),
-                            #     "The x-axis is year (of the survey)", tags$br(),
-                            #     "The y-axis is the percent of students"
-                            #
-                            # ),
-                            
-                            div(
-                                
-                                class = "center-wrap",
-                                
-                                div(
-                                    class = "margin10",
-                                    
-                                    pickerInput(
-                                        inputId = "q",
-                                        label = "Question",
-                                        choices = unique(df$q) %>% sort(),
-                                        multiple = FALSE
-                                    )
-                                ),
-                                
-                                div(
-                                    class = "margin10",
-                                    
-                                    pickerInput(
-                                        inputId = "gender",
-                                        label = "Gender",
-                                        choices = unique(levels(df$gender)),
-                                        selected = c("Female", "Male", "Other"),
-                                        multiple = TRUE,
-                                        width = "150px"
-                                    )
-                                ),
-                                
-                                div(
-                                    class = "margin10",
-                                    
-                                    pickerInput(
-                                        inputId = "grade",
-                                        label = "Grade",
-                                        choices = unique(levels(df$grade)),
-                                        selected = c("12", "10", "8", "6"),
-                                        multiple = TRUE,
-                                        width = "150px"
-                                    )
-                                ),
-                                
-                                div(
-                                    class = "margin10",
-                                    actionLink(inputId = "go", label = "Go", icon = icon("paper-plane"))
-                                )
-                            ),
-                            
-                            # div(plotOutput("p_by_yr", height = "500px")),
-                            div(girafeOutput("p_by_i_yr"))
-                            
-                        )
-                    ),  # End Tab Panel Plots
+                            #     class = "margin10",
+                            # 
+                            #     pickerInput(
+                            #         inputId = "pal",
+                            #         label = "",
+                            #         choices = c("Blues", "Set1"),
+                            #         multiple = FALSE,
+                            #         width = "150px"
+                            #     )
+                            # )
+                    #         
+                    #     ),
+                    #     
+                    #     
+                    #     div(
+                    #         
+                    #         class = "content-box mb20",
+                    #         
+                    #         div(class = "center-flex medblue em1-5", "Compare Grades"),
+                    #         div(class = "mb20", plotOutput("p_by_grade", height = "500px"))
+                    #         
+                    #     ),
+                    #     
+                    #     div(
+                    #         
+                    #         class = "content-box mb20",
+                    #         
+                    #         div(class = "center-flex medblue em1-5", "Compare Cohorts"),
+                    #         div(class = "mb20", plotOutput("p_by_cohort", height = "500px"))
+                    #         
+                    #     ),
+                    #     
+                    #     
+                    #     div(
+                    #         
+                    #         class = "content-box mb20",
+                    #         
+                    #         div(class = "center-flex medblue em1-5", "Longitudinal Drill Down"),
+                    #         
+                    #         # div(
+                    #         #
+                    #         #     class = "center-wrap margin30",
+                    #         #
+                    #         #     "This plot allows the user to drill down into specific demographics for the specific question", tags$br(),
+                    #         #     "The data source is selected at the top of this page", tags$br(),
+                    #         #     "Select the question (within the data source) from the drop down menu", tags$br(),
+                    #         #     "Rows of plots correspond to grade", tags$br(),
+                    #         #     "Columns of plots correspond to gender", tags$br(),
+                    #         #     "The x-axis is year (of the survey)", tags$br(),
+                    #         #     "The y-axis is the percent of students"
+                    #         #
+                    #         # ),
+                    #         
+                    #         div(
+                    #             
+                    #             class = "center-wrap",
+                    #             
+                    #             div(
+                    #                 class = "margin10",
+                    #                 
+                    #                 pickerInput(
+                    #                     inputId = "q",
+                    #                     label = "Question",
+                    #                     choices = unique(df$q) %>% sort(),
+                    #                     multiple = FALSE
+                    #                 )
+                    #             ),
+                    #             
+                    #             div(
+                    #                 class = "margin10",
+                    #                 
+                    #                 pickerInput(
+                    #                     inputId = "gender",
+                    #                     label = "Gender",
+                    #                     choices = unique(levels(df$gender)),
+                    #                     selected = c("Female", "Male", "Other"),
+                    #                     multiple = TRUE,
+                    #                     width = "150px"
+                    #                 )
+                    #             ),
+                    #             
+                    #             div(
+                    #                 class = "margin10",
+                    #                 
+                    #                 pickerInput(
+                    #                     inputId = "grade",
+                    #                     label = "Grade",
+                    #                     choices = unique(levels(df$grade)),
+                    #                     selected = c("12", "10", "8", "6"),
+                    #                     multiple = TRUE,
+                    #                     width = "150px"
+                    #                 )
+                    #             ),
+                    #             
+                    #             div(
+                    #                 class = "margin10",
+                    #                 actionLink(inputId = "go", label = "Go", icon = icon("paper-plane"))
+                    #             )
+                    #         ),
+                    #         
+                    #         # div(plotOutput("p_by_yr", height = "500px")),
+                    #         div(girafeOutput("p_by_i_yr"))
+                    #         
+                    #     )
+                    # ),  # End Tab Panel Plots
                     
                     tabPanel(
                         
                         ### tables ----
                         title = "Tables",
+                        
+                        div(
+                            class = "margin10 center-flex",
+                            "Click a row in the table to display corresponding plots"
+                        ),
                         
                         tabsetPanel(
                             
@@ -347,7 +352,20 @@ ui <- function(req) {
                                     div(DT::dataTableOutput("dt_cohort"))
                                 )
                             )
+                        ),
+                       
+                        div(
+                            class = "margin10 center-flex",
+                            
+                            pickerInput(
+                                inputId = "pal",
+                                label = "Color Palette for Plots",
+                                choices = c("Blues", "Set1"),
+                                multiple = FALSE,
+                                width = "150px"
+                            )
                         )
+                        
                     ),
                     
                     ### correlations ----
@@ -492,11 +510,10 @@ server <- function(input, output, session) {
         if(testing){
             
             print("testing")
-            print(input$node_selected)
-            print(input$focus)
-            
-            x <- df_nodes %>% filter(q == input$focus) %>% pull(id)
-            print(x)
+            print(input$dt_locale_rows_selected)
+           print(df_p_locale()) 
+           print(unique(df_p_locale()$q))
+           print(input$pal)
             
         }
     })
@@ -633,9 +650,15 @@ server <- function(input, output, session) {
                 arrange(-year, -abs(leb_state)) %>% 
                 # desired_outcome() %>% 
                 
+                
+                left_join(df_ref %>% select(category, q, category_label, sub_category_label, chart_label)) %>% 
+                
                 select(
                     `Desired Outcome` = desired_outcome,
                     Category = category,
+                    Label = category_label,
+                    `Sub Label` = sub_category_label,
+                    `Chart Label` = chart_label,
                     Question = q,
                     Year = year,
                     Grade = grade,
@@ -647,10 +670,10 @@ server <- function(input, output, session) {
                     
                 ) %>%
                 
-                mutate(across(c(Category:Gender), ~factor(.))) 
-            
+                mutate(across(c(`Desired Outcome`:Gender), ~factor(.))) 
             
         })
+    
     
     output$dt_locale <- 
         
@@ -659,14 +682,15 @@ server <- function(input, output, session) {
             make_dt(dt_locale()) %>% 
                 
                 formatPercentage(
-                    columns = 7:9,
+                    columns = 10:12,
                     digits = 1
                 ) %>% 
                 
                 formatStyle(
-                    columns = 9,
+                    columns = 12,
                     color = styleInterval(c(-0.05, 0.05), c("blue", "black", "blue"))
                 ) 
+            
         })
     
     ## diff by gender ----
