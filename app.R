@@ -1222,9 +1222,14 @@ server <- function(input, output, session) {
         
         df_centrality() %>% 
             
+            left_join(df_ref) %>% 
+            
             select(
                 Category = category,
                 Question = q,
+                `Category Label` = category_label,
+                `Sub Category Label` = sub_category_label,
+                `Chart Label` = chart_label,
                 `Desired Outcome` = desired_outcome,
                 Degree = degree,
                 Betweeness = betweeness,
@@ -1261,7 +1266,17 @@ server <- function(input, output, session) {
                 # mutate(label = )
                 
                 mutate(color = ifelse(desired_outcome == "Low", "#ff9896", "#aec7e8")) %>%
-                mutate(title = label) 
+                # mutate(title = label)
+                
+                mutate(
+                    title = 
+                        paste0(
+                            "<b>Category:</b> ", category, "<br>",
+                            "<b>Category Label:</b> ", category_label, "<br>",
+                            "<b>Sub Category:</b> ", sub_category_label, "<br>",
+                            "<b>Chart Label:</b> ", chart_label
+                        )
+                )
             
             visNetwork(l_net$nodes, l_net$edges) %>% 
                 visInteraction(hover = TRUE, multiselect = FALSE) %>%
