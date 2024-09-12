@@ -22,6 +22,7 @@ This app would serve nicely as a starting point for a student project
 
 # Log
 
+* 2024 09 12 added info to corr net
 * 2024 09 10 turned off reference tab - references in default table
 * 2024 09 10 turned off plots tab 
 * 2024 09 10 added question into to By Locale DT
